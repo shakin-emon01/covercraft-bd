@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String
+  passwordHash String?
+  googleId     String?
+  role         Role      @default(STUDENT)
+  profile      Profile?
+  covers       Cover[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Profile {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id])
+  studentId    String
+  department   String
+  semester     String
+  session      String
+  universityId String
+  university   University @relation(fields: [universityId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model University {
+  id        String    @id @default(cuid())
+  name      String
+  shortName String    @unique
+  logoUrl   String
+  type      UniType
+  profiles  Profile[]
+  createdAt DateTime  @default(now())
+}
+
+model Cover {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  templateId String
+  coverData  Json
+  pngUrl     String?
+  pdfUrl     String?
+  createdAt  DateTime @default(now())
+}
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum UniType {
+  PUBLIC
+  PRIVATE
+}
