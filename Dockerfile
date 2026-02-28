@@ -40,8 +40,11 @@ RUN pnpm install --frozen-lockfile
 # Copy server source code and prisma
 COPY apps/server ./apps/server
 
-# Build TypeScript
+# Generate Prisma client
 WORKDIR /app/apps/server
+RUN npx prisma generate
+
+# Build TypeScript
 RUN pnpm build
 
 # Expose port (Railway provides PORT env)
