@@ -1,4 +1,4 @@
-# Railway Deployment Dockerfile for CoverCraft BD Server
+# Railway Deployment Dockerfile for CoverCraft BD Server v2
 FROM node:22-slim
 
 # Install system dependencies for Puppeteer
