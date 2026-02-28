@@ -1,0 +1,13 @@
+
+> server@1.0.0 dev C:\Users\Gigabyte\covercraft-bd\apps\server
+> nodemon --exec "node --require ts-node/register src/index.ts" --ext ts
+
+[33m[nodemon] 3.1.14[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: ts[39m
+[32m[nodemon] starting `node --require ts-node/register src/index.ts`[39m
+🚀 Secure Server running on port 5000
+[32m[nodemon] restarting child process[39m
+[32m[nodemon] starting `node --require ts-node/register src/index.ts`[39m
+🚀 Secure Server running on port 5000

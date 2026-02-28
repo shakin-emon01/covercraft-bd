@@ -1,0 +1,697 @@
+^C^CError checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+Error checking token blacklist: PrismaClientKnownRequestError: 
+Invalid `prisma.tokenBlacklist.findUnique()` invocation in
+C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:58
+
+  12 if (!token) return next();
+  13 
+  14 try {
+→ 15   const blacklistedToken = await prisma.tokenBlacklist.findUnique(
+Error validating datasource `db`: the URL must start with the protocol `prisma://`
+    at $n.handleRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:7315)
+    at $n.handleAndLogRequestError (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6623)
+    at $n.request (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:121:6307)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async l (C:\Users\Gigabyte\covercraft-bd\node_modules\.pnpm\@prisma+client@5.22.0_prisma@5.22.0\node_modules\@prisma\client\runtime\library.js:130:9633)
+    at async checkTokenBlacklist (C:\Users\Gigabyte\covercraft-bd\apps\server\src\middleware\security.middleware.ts:15:30) {
+  code: 'P6001',
+  clientVersion: '5.22.0',
+  meta: { modelName: 'TokenBlacklist' }
+}
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1
+WAF: Suspicious pattern detected in request from ::1

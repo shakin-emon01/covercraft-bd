@@ -1,13 +1,15 @@
+import type { FormEvent } from "react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser, googleAuth } from "../api/auth";
 import { useAuthStore } from "../store/authStore";
 import { GoogleLogin } from "@react-oauth/google";
-import { jwtDecode } from "jwt-decode";
 import { useViewport } from "../hooks/useViewport";
+import { isGoogleAuthConfigured } from "../config/authConfig";
 
 export default function Register() {
-  const [form, setForm] = useState({ name:"", email:"", password:"", confirm:"" });
+  type FormState = { name: string; email: string; password: string; confirm: string };
+  const [form, setForm] = useState<FormState>({ name:"", email:"", password:"", confirm:"" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
@@ -15,29 +17,44 @@ export default function Register() {
   const navigate = useNavigate();
   const { isMobile, isTablet } = useViewport();
 
-  const update = (k,v) => setForm(p => ({...p,[k]:v}));
+  const update = (k: keyof FormState, v: string) => setForm((p) => ({ ...p, [k]: v }));
+  const getApiErrorMessage = (error: unknown, fallback: string) => {
+    if (typeof error === "object" && error !== null) {
+      const maybeError = error as { response?: { data?: { message?: string } } };
+      const message = maybeError.response?.data?.message;
+      if (typeof message === "string" && message.trim()) return message;
+    }
+    return fallback;
+  };
 
-  const handleRegister = async (e) => {
+  const handleRegister = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (form.password !== form.confirm) { setError("Passwords do not match"); return; }
     if (form.password.length < 6) { setError("Password must be at least 6 characters"); return; }
     setLoading(true); setError("");
     try {
       const { data } = await registerUser({ name:form.name, email:form.email, password:form.password });
-      setAuth(data.user, data.token);
+      setAuth(data.user, data.accessToken || data.token);
       navigate("/profile/setup");
-    } catch (err) {
-      setError(err.response?.data?.message || "Registration failed");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Registration failed"));
     } finally { setLoading(false); }
   };
 
-  const handleGoogle = async (credentialResponse) => {
+  const handleGoogle = async (credentialResponse: { credential?: string }) => {
+    const credential = credentialResponse?.credential;
+    if (!credential) {
+      setError("Google sign-up failed. No credential received.");
+      return;
+    }
+
     try {
-      const decoded = jwtDecode(credentialResponse.credential);
-      const { data } = await googleAuth({ googleId: decoded.sub, email: decoded.email, name: decoded.name });
-      setAuth(data.user, data.token);
+      const { data } = await googleAuth({ credential });
+      setAuth(data.user, data.accessToken || data.token);
       navigate("/profile/setup");
-    } catch { setError("Google sign-up failed. Please try again."); }
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Google sign-up failed. Please try again."));
+    }
   };
 
   const strength = form.password.length === 0 ? 0 : form.password.length < 6 ? 1 : form.password.length < 10 ? 2 : 3;
@@ -60,21 +77,86 @@ export default function Register() {
           <p style={{ fontSize:15, color:"rgba(255,255,255,0.55)", lineHeight:1.7, margin:"0 0 36px" }}>
             Create your free account and start generating professional cover pages in minutes.
           </p>
-          <div style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)", borderRadius:14, padding:"24px" }}>
-            <div style={{ fontSize:13, color:"rgba(255,255,255,0.5)", marginBottom:16, fontWeight:600, letterSpacing:1 }}>HOW IT WORKS</div>
-            {[
-              { step:"01", title:"Create your account", desc:"Register with email or Google" },
-              { step:"02", title:"Set up your profile", desc:"Add your student info once" },
-              { step:"03", title:"Generate cover pages", desc:"Pick template, fill details, download" },
-            ].map((s,i) => (
-              <div key={i} style={{ display:"flex", gap:14, marginBottom: i<2?16:0, alignItems:"flex-start" }}>
-                <div style={{ width:32, height:32, borderRadius:"50%", background:"rgba(45,212,191,0.15)", border:"1px solid rgba(45,212,191,0.3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:800, color:"#2dd4bf", flexShrink:0 }}>{s.step}</div>
-                <div style={{ textAlign:"left" }}>
-                  <div style={{ fontSize:13.5, fontWeight:700, color:"rgba(255,255,255,0.85)" }}>{s.title}</div>
-                  <div style={{ fontSize:12, color:"rgba(255,255,255,0.4)" }}>{s.desc}</div>
+          {/* 🚀 PREMIUM "HOW IT WORKS" SECTION (Glassmorphism & Hover Effects) */}
+          <div style={{ 
+            marginTop: '30px', 
+            maxWidth: '420px',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+            borderRadius: '16px',
+            padding: '24px',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)'
+          }}>
+            <div style={{ 
+              textAlign: 'center', 
+              fontSize: '12px', 
+              fontWeight: '700', 
+              color: '#94a3b8', 
+              letterSpacing: '2px', 
+              marginBottom: '20px' 
+            }}>
+              HOW IT WORKS
+            </div>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {[
+                { num: "01", title: "Create your account", desc: "Register with email or Google" },
+                { num: "02", title: "Set up your profile", desc: "Add your student info once" },
+                { num: "03", title: "Generate cover pages", desc: "Pick template, fill details, download" }
+              ].map((step, idx) => (
+                <div 
+                  key={idx} 
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    padding: '12px 16px',
+                    borderRadius: '12px',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    cursor: 'default',
+                    background: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
+                    e.currentTarget.style.transform = 'translateX(6px)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.transform = 'translateX(0)';
+                  }}
+                >
+                  {/* Elegant Number Circle (Green Theme) */}
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, rgba(16,185,129,0.15) 0%, rgba(5,150,105,0.25) 100%)',
+                    border: '1px solid rgba(16,185,129,0.4)',
+                    color: '#34d399',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '14px',
+                    fontWeight: '800',
+                    flexShrink: 0,
+                    boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.05)'
+                  }}>
+                    {step.num}
+                  </div>
+                  
+                  {/* Text Content */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ color: '#f8fafc', fontSize: '15px', fontWeight: '700', letterSpacing: '0.3px' }}>
+                      {step.title}
+                    </span>
+                    <span style={{ color: '#94a3b8', fontSize: '13px' }}>
+                      {step.desc}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </div>}
@@ -94,10 +176,10 @@ export default function Register() {
         )}
 
         <form onSubmit={handleRegister}>
-          {[
+          {([
             { label:"FULL NAME", key:"name", type:"text", placeholder:"Your full name" },
             { label:"EMAIL ADDRESS", key:"email", type:"email", placeholder:"you@example.com" },
-          ].map(field => (
+          ] as Array<{ label: string; key: keyof FormState; type: string; placeholder: string }>).map((field) => (
             <div key={field.key} style={{ marginBottom:14 }}>
               <label style={{ display:"block", fontSize:11, fontWeight:700, color:"#374151", letterSpacing:1, marginBottom:5 }}>{field.label}</label>
               <input type={field.type} value={form[field.key]} onChange={e => update(field.key, e.target.value)} placeholder={field.placeholder} required
@@ -152,7 +234,13 @@ export default function Register() {
         </div>
 
         <div style={{ display:"flex", justifyContent:"center" }}>
-          <GoogleLogin onSuccess={handleGoogle} onError={() => setError("Google sign-up failed")} theme="outline" size="large" width={isMobile ? "280" : "380"}/>
+          {isGoogleAuthConfigured ? (
+            <GoogleLogin onSuccess={handleGoogle} onError={() => setError("Google sign-up failed")} theme="outline" size="large" width={isMobile ? "280" : "380"}/>
+          ) : (
+            <div style={{ width:"100%", border:"1px solid #e2e8f0", borderRadius:9, padding:"12px", textAlign:"center", fontSize:12.5, color:"#64748b", background:"#f8fafc" }}>
+              Google sign-up is not configured yet. Set a valid <code>VITE_GOOGLE_CLIENT_ID</code> in <code>apps/web/.env</code>.
+            </div>
+          )}
         </div>
       </div>
     </div>

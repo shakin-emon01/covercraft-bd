@@ -1,10 +1,14 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from './store/authStore'
 import Login from './pages/Login'
-import Register from './pages/Register.jsx'
-import Dashboard from './pages/Dashboard.jsx'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
 import ProfileSetup from './pages/ProfileSetup.jsx'
 import CoverDesigner from './pages/CoverDesigner.jsx'
+import PrintView from './pages/PrintView.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
+import SharedCover from './pages/SharedCover.jsx'
+import SavedCovers from './pages/SavedCovers.jsx'
 import type { ReactNode } from 'react'
 
 function PrivateRoute({ children }: { children: ReactNode }) {
@@ -23,11 +27,15 @@ function App() {
       {/* Public routes */}
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      <Route path="/share/:id" element={<SharedCover />} />
 
       {/* Protected routes */}
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+      <Route path="/covers" element={<PrivateRoute><SavedCovers /></PrivateRoute>} />
       <Route path="/profile/setup" element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
       <Route path="/create" element={<PrivateRoute><CoverDesigner /></PrivateRoute>} />
+      <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
+      <Route path="/print/:id" element={<PrintView />} />
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
