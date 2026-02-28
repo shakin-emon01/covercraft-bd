@@ -2,260 +2,261 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+const normalizeUniversityName = (value: string) => {
+  return value
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const hasCounterSuffix = (shortName: string) => /-\d+$/.test(shortName);
+
+const buildUniqueShortName = (baseShortName: string, usedShortNames: Set<string>) => {
+  if (!usedShortNames.has(baseShortName)) return baseShortName;
+
+  let counter = 1;
+  let candidate = `${baseShortName}-${counter}`;
+  while (usedShortNames.has(candidate)) {
+    counter++;
+    candidate = `${baseShortName}-${counter}`;
+  }
+  return candidate;
+};
+
+// Your provided dataset
+const universityData = {
+    "public": [
+        "University of Dhaka (DU)", "University of Rajshahi (RU)", "University of Chittagong (CU)",
+        "Jahangirnagar University (JU)", "Islamic University Bangladesh (IU)", "Khulna University (KU)",
+        "Jagannath University (JnU)", "Comilla University (CoU)", "Jatiya Kabi Kazi Nazrul Islam University (JKKNIU)",
+        "Bangladesh University of Professionals (BUP)", "Begum Rokeya University Rangpur (BRUR)",
+        "University of Barishal (BU)", "Rabindra University Bangladesh (RUB)", "Netrokona University (NkU)",
+        "Kishoreganj University (KgU)", "Meherpur University (MU)", "Thakurgaon University (TU)",
+        "Naogaon University (NgU)", "Shahjalal University of Science and Technology (SUST)",
+        "Hajee Mohammad Danesh Science & Technology University (HSTU)", "Mawlana Bhashani Science and Technology University (MBSTU)",
+        "Patuakhali Science and Technology University (PSTU)", "Noakhali Science and Technology University (NSTU)",
+        "Jashore University of Science and Technology (JUST)", "Pabna University of Science and Technology (PUST)",
+        "Gopalganj Science and Technology University (GSTU)", "Rangamati Science and Technology University (RmSTU)",
+        "Jamalpur Science and Technology University (JSTU)", "Chandpur Science and Technology University (CSTU)",
+        "Sunamganj Science and Technology University (SSTU)", "Bogra Science and Technology University (BSTU)",
+        "Lakshmipur Science and Technology University (LSTU)", "Pirojpur Science & Technology University (PrSTU)",
+        "Satkhira University of Science and Technology (SaUST)", "Narayanganj Science and Technology University (NGSTU)",
+        "Bangladesh University of Engineering & Technology (BUET)", "Military Institute of Science and Technology (MIST)",
+        "Rajshahi University of Engineering & Technology (RUET)", "Khulna University of Engineering & Technology (KUET)",
+        "Chittagong University of Engineering & Technology (CUET)", "Dhaka University of Engineering & Technology (DUET)",
+        "Bangladesh Agricultural University (BAU)", "Gazipur Agricultural University (GAU)",
+        "Sher-e-Bangla Agricultural University (SBAU)", "Sylhet Agricultural University (SAU)",
+        "Khulna Agricultural University (KAU)", "Habiganj Agricultural University (HAU)",
+        "Kurigram Agricultural University (KuriAU)", "Shariatpur Agriculture University (ShAU)",
+        "Bangladesh Medical University (BMU)", "Chittagong Medical University (CMU)",
+        "Rajshahi Medical University (RMU)", "Sylhet Medical University (SMU)",
+        "Khulna Medical University (KMU)", "Chittagong Veterinary and Animal Sciences University (CVASU)",
+        "Bangladesh University of Textiles (BUTEX)", "Bangladesh Maritime University (BMU)",
+        "University of Frontier Technology Bangladesh (UFTB)", "Aviation and Aerospace University Bangladesh (AAUB)",
+        "National University Bangladesh (NU)", "Bangladesh Open University (BOU)",
+        "Islamic Arabic University (IAU)", "Dhaka Central University (DCU)"
+    ],
+    "private": [
+        "International University of Business Agriculture and Technology (IUBAT)", "North South University (NSU)",
+        "Independent University, Bangladesh (IUB)", "American International University-Bangladesh (AIUB)",
+        "Dhaka International University (DIU)", "International Islamic University, Chittagong (IIUC)",
+        "Asian University of Bangladesh (AUB)", "East West University (EWU)", "Gono Bishwabidyalay (GB)",
+        "People's University of Bangladesh (PUB)", "Queens University (QU)", "University of Asia Pacific (UAP)",
+        "Chittagong Independent University (CIU)", "Bangladesh University (BU)", "BGC Trust University Bangladesh (BGCTUB)",
+        "Brac University (BracU)", "Manarat International University (MIU)", "Premier University (PU)",
+        "Southern University Bangladesh (SUB)", "Sylhet International University (SIU)",
+        "University of Development Alternative (UODA)", "City University Bangladesh (CUB)",
+        "Daffodil International University (DIU)", "Green University of Bangladesh (GUB)",
+        "IBAIS University (IU)", "Leading University (LU)", "Northern University Bangladesh (NUB)",
+        "Prime University (PU)", "Southeast University (SEU)", "Stamford University Bangladesh (SU)",
+        "State University of Bangladesh (SUB)", "Eastern University Bangladesh (EU)",
+        "Metropolitan University (MU)", "Millennium University (MU)", "Primeasia University (PAU)",
+        "Royal University of Dhaka (RUD)", "United International University (UIU)",
+        "University of Information Technology and Sciences (UITS)", "University of South Asia (USAB)",
+        "Presidency University (PU)", "Uttara University (UU)", "Victoria University of Bangladesh (VUB)",
+        "World University of Bangladesh (WUB)", "Asa University Bangladesh (ASAUB)",
+        "Bangladesh Islami University (BIU)", "East Delta University (EDU)",
+        "Northern University of Business and Technology Khulna (NUB)", "Britannia University (BU)",
+        "Feni University (FU)", "Khwaja Yunus Ali University (KYAU)", "European University of Bangladesh (EUB)",
+        "First Capital University Of Bangladesh (FCUB)", "BGMEA University of Fashion & Technology (BUFT)",
+        "Hamdard University Bangladesh (HUB)", "Ishakha International University (IIUB)",
+        "North East University Bangladesh (NEUB)", "North Western University Bangladesh (NWU)",
+        "Port City International University (PCIU)", "Varendra University (VU)", "Sonargaon University (SU)",
+        "Cox's Bazar International University (CBIU)", "Fareast International University (FIU)",
+        "German University Bangladesh (GUB)", "North Bengal International University (NBIU)",
+        "Notre Dame University Bangladesh (NDUB)", "Ranada Prasad Shaha University (RPSU)",
+        "Brahmaputra International University (BIU)", "Times University Bangladesh (TMUB)",
+        "Canadian University of Bangladesh (CUB)", "Global University Bangladesh (GUB)",
+        "NPI University of Bangladesh (NPIUB)", "Rabindra Maitree University (RMU)",
+        "University of Scholars (IUS)", "University of Creative Technology Chittagong (UCTC)",
+        "Anwer Khan Modern University (AKMU)", "University of Global Village (UIGV)",
+        "Khulna Khan Bahadur Ahsanullah University (KKBAU)", "Trust University Barishal (TUB)",
+        "University of Brahmanbaria (UOB)", "University of Skill Enrichment and Technology (USET)",
+        "International Standard University (ISU)", "ZNRF University of Management Sciences (ZUMS)",
+        "Bandarban University (BdU)", "RTM Al-Kabir Technical University (RTM-AKTU)",
+        "University of Science & Technology Chittagong (USTC)", "Ahsanullah University of Science and Technology (AUST)",
+        "Pundra University of Science and Technology (PDUST)", "Bangladesh University of Business and Technology (BUBT)",
+        "Atish Dipankar University of Science and Technology (ADUST)", "ZH Sikder University of Science & Technology (ZHSUST)",
+        "Rajshahi Science & Technology University (RSTU)", "Bangladesh Army International University of Science & Technology (BAIUST)",
+        "Bangladesh Army University of Science & Technology Khulna (BAUST Khulna)", "Bangladesh Army University of Science and Technology Saidpur (BAUST Saidpur)",
+        "CCN University of Science & Technology (CCNUST)", "Central University of Science and Technology (CUST)",
+        "Dr. Momtaz Begum University of Science and Technology (MUST)", "Central Women's University (CWU)",
+        "Shanto-Mariam University of Creative Technology (SMUCT)", "University of Liberal Arts Bangladesh (ULAB)",
+        "Bangladesh University of Health Sciences (BUHS)", "Exim Bank Agricultural University Bangladesh (EBAUB)",
+        "Bangladesh Army University of Engineering & Technology (BAUET)", "Tagore University of Creative Arts (TUCA)"
+    ]
+};
+
 async function main() {
-  console.log('🌱 Seeding universities...');
+  console.log('🌱 Analyzing and Syncing Universities of Bangladesh...');
 
-  const universities = [
-    // ═══ PUBLIC UNIVERSITIES ═══
-    {
-      name: 'University of Dhaka',
-      shortName: 'DU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/9/9d/University_of_Dhaka_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Bangladesh University of Engineering and Technology',
-      shortName: 'BUET',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/a/a0/BUET_LOGO.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'University of Chittagong',
-      shortName: 'CU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/6/68/University_of_Chittagong_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Rajshahi University',
-      shortName: 'RU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/b/b7/Rajshahi_University_Logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Jahangirnagar University',
-      shortName: 'JU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/2/2e/Jahangirnagar_University_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Bangladesh Agricultural University',
-      shortName: 'BAU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/8/8b/Bangladesh_Agricultural_University_Logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Khulna University',
-      shortName: 'KU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/3/3b/Khulna_University_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Shahjalal University of Science and Technology',
-      shortName: 'SUST',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/0/09/Shahjalal_University_of_Science_%26_Technology_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Islamic University, Bangladesh',
-      shortName: 'IU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/1/1c/Islamic_University%2C_Bangladesh_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Chittagong University of Engineering and Technology',
-      shortName: 'CUET',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/b/b4/CUET_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Rajshahi University of Engineering and Technology',
-      shortName: 'RUET',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/6/62/RUET_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Khulna University of Engineering and Technology',
-      shortName: 'KUET',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/5/5e/Khulna_University_of_Engineering_%26_Technology_logo.svg',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Dhaka University of Engineering and Technology',
-      shortName: 'DUET',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/6/6e/DUET_logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Mawlana Bhashani Science and Technology University',
-      shortName: 'MBSTU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/4/4f/MBSTU_Logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Noakhali Science and Technology University',
-      shortName: 'NSTU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/d/d7/NSTU_Logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Jessore University of Science and Technology',
-      shortName: 'JUST',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/8/8e/JUST_logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Pabna University of Science and Technology',
-      shortName: 'PUST',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/5/5d/PUST_logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Comilla University',
-      shortName: 'CoU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/3/thirty/Comilla_University_logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Begum Rokeya University',
-      shortName: 'BRUR',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f4/Begum_Rokeya_University_logo.png',
-      type: 'PUBLIC' as const,
-    },
-    {
-      name: 'Bangabandhu Sheikh Mujibur Rahman Science and Technology University',
-      shortName: 'BSMRSTU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/2/2d/BSMRSTU_logo.png',
-      type: 'PUBLIC' as const,
-    },
+  // Helper function to separate Name and ShortName gracefully
+  const processList = (list: string[], type: 'PUBLIC' | 'PRIVATE') => {
+    return list.map(item => {
+      const match = item.match(/(.+)\s\((.+)\)$/);
+      if (match) {
+        return { name: match[1].trim(), shortName: match[2].trim(), type };
+      }
+      return { name: item.trim(), shortName: item.trim().substring(0, 5).toUpperCase(), type };
+    });
+  };
 
-    // ═══ PRIVATE UNIVERSITIES ═══
-    {
-      name: 'BRAC University',
-      shortName: 'BRACU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/e/e6/BRAC_University_Logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'North South University',
-      shortName: 'NSU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/c/c4/North_South_University_Logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Independent University, Bangladesh',
-      shortName: 'IUB',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/8/8f/Independent_University_Bangladesh_logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'East West University',
-      shortName: 'EWU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/f/f3/East_West_University_logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'American International University-Bangladesh',
-      shortName: 'AIUB',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/e/e4/AIUB_Logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'United International University',
-      shortName: 'UIU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/5/5f/United_International_University_logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Daffodil International University',
-      shortName: 'DIU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/c/c9/Daffodil_International_University_Logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Southeast University',
-      shortName: 'SEU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/4/4e/Southeast_University_Bangladesh_logo.png',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Stamford University Bangladesh',
-      shortName: 'SUB',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/6/6b/Stamford_University_Bangladesh_logo.png',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Bangladesh University of Business and Technology',
-      shortName: 'BUBT',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/3/3e/BUBT_logo.png',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Metropolitan University',
-      shortName: 'MU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/9/9e/Metropolitan_University_Bangladesh_logo.png',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Prime University',
-      shortName: 'PU',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/b/b3/Prime_University_logo.png',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Green University of Bangladesh',
-      shortName: 'GUB',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/1/1e/Green_University_of_Bangladesh_logo.png',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'Ahsanullah University of Science and Technology',
-      shortName: 'AUST',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/a/a3/Ahsanullah_University_of_Science_and_Technology_logo.svg',
-      type: 'PRIVATE' as const,
-    },
-    {
-      name: 'International Islamic University Chittagong',
-      shortName: 'IIUC',
-      logoUrl: 'https://upload.wikimedia.org/wikipedia/en/6/69/IIUC_logo.svg',
-      type: 'PRIVATE' as const,
-    },
+  const dedupedFromSource = new Map<string, { name: string; shortName: string; type: 'PUBLIC' | 'PRIVATE' }>();
+  const allUnisRaw = [
+    ...processList(universityData.public, 'PUBLIC'),
+    ...processList(universityData.private, 'PRIVATE')
   ];
 
-  for (const uni of universities) {
-    const existing = await prisma.university.findFirst({
-      where: { shortName: uni.shortName },
-    });
-
-    if (existing) {
-      await prisma.university.update({
-        where: { id: existing.id },
-        data: { logoUrl: uni.logoUrl, name: uni.name },
-      });
-    } else {
-      await prisma.university.create({ data: uni });
+  for (const uni of allUnisRaw) {
+    const normalized = normalizeUniversityName(uni.name);
+    if (!dedupedFromSource.has(normalized)) {
+      dedupedFromSource.set(normalized, uni);
     }
-    console.log(`✅ ${uni.shortName} - ${uni.name}`);
   }
 
-  // ═══ CREATE ADMIN USER ═══
-  const bcrypt = await import('bcryptjs');
-  const adminExists = await prisma.user.findUnique({ where: { email: 'admin@covercraft.bd' } });
+  const allUnis = Array.from(dedupedFromSource.values());
 
-  if (!adminExists) {
-    await prisma.user.create({
-      data: {
-        name: 'Admin',
-        email: 'admin@covercraft.bd',
-        passwordHash: await bcrypt.hash('Admin@2024', 12),
-        role: 'ADMIN',
-      },
+  // Step 0: Cleanup already duplicated universities in DB (same normalized name).
+  const existingRows = await prisma.university.findMany({
+    select: {
+      id: true,
+      name: true,
+      shortName: true,
+      logoUrl: true,
+      createdAt: true
+    }
+  });
+
+  const groupedByNormalizedName = new Map<string, typeof existingRows>();
+  for (const row of existingRows) {
+    const normalized = normalizeUniversityName(row.name);
+    const current = groupedByNormalizedName.get(normalized) ?? [];
+    current.push(row);
+    groupedByNormalizedName.set(normalized, current);
+  }
+
+  let removedDuplicates = 0;
+  let relinkedProfiles = 0;
+
+  for (const group of groupedByNormalizedName.values()) {
+    if (group.length < 2) continue;
+
+    const sorted = [...group].sort((a, b) => {
+      const aIsCounter = hasCounterSuffix(a.shortName) ? 1 : 0;
+      const bIsCounter = hasCounterSuffix(b.shortName) ? 1 : 0;
+      if (aIsCounter !== bIsCounter) return aIsCounter - bIsCounter;
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
-    console.log('✅ Admin user created → email: admin@covercraft.bd | password: Admin@2024');
+
+    await prisma.$transaction(async (tx) => {
+      const [primary, ...duplicates] = sorted;
+      let primaryId = primary.id;
+      let primaryLogo = primary.logoUrl?.trim() ?? '';
+
+      if (!primaryLogo) {
+        const donor = duplicates.find((item) => (item.logoUrl?.trim() ?? '').length > 0);
+        if (donor) {
+          await tx.university.update({
+            where: { id: primary.id },
+            data: { logoUrl: donor.logoUrl }
+          });
+          primaryLogo = donor.logoUrl;
+        }
+      }
+
+      for (const duplicate of duplicates) {
+        const updatedProfiles = await tx.profile.updateMany({
+          where: { universityId: duplicate.id },
+          data: { universityId: primaryId }
+        });
+        relinkedProfiles += updatedProfiles.count;
+
+        await tx.university.delete({
+          where: { id: duplicate.id }
+        });
+        removedDuplicates++;
+      }
+    });
   }
 
-  console.log('🎉 Seeding complete!');
+  if (removedDuplicates > 0) {
+    console.log(`🧹 Removed ${removedDuplicates} duplicate universities and relinked ${relinkedProfiles} profile records.`);
+  }
+
+  const currentUniversities = await prisma.university.findMany({
+    select: {
+      name: true,
+      shortName: true
+    }
+  });
+
+  const existingNormalizedNames = new Set(
+    currentUniversities.map((uni) => normalizeUniversityName(uni.name))
+  );
+  const usedShortNames = new Set(currentUniversities.map((uni) => uni.shortName));
+
+  let created = 0;
+  let skipped = 0;
+
+  for (const uni of allUnis) {
+    const normalizedName = normalizeUniversityName(uni.name);
+
+    // 1. Skip if equivalent university name already exists in DB.
+    if (existingNormalizedNames.has(normalizedName)) {
+      skipped++;
+      continue;
+    }
+
+    // 2. Build a unique shortName only when needed.
+    const finalShortName = buildUniqueShortName(uni.shortName, usedShortNames);
+
+    // 3. Create new university safely.
+    await prisma.university.create({
+      data: {
+        name: uni.name,
+        shortName: finalShortName,
+        type: uni.type,
+        logoUrl: ''
+      }
+    });
+
+    existingNormalizedNames.add(normalizedName);
+    usedShortNames.add(finalShortName);
+    created++;
+  }
+
+  console.log(`✅ Sync Complete!`);
+  console.log(`📊 Successfully Added: ${created} new universities.`);
+  console.log(`🛡️ Skipped & Protected: ${skipped} existing universities (logos kept safe!).`);
 }
 
 main()
-  .catch(console.error)
-  .finally(() => prisma.$disconnect());
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

@@ -8,16 +8,32 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
-  name         String
-  passwordHash String?
-  googleId     String?
-  role         Role      @default(STUDENT)
-  profile      Profile?
-  covers       Cover[]
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                    String                   @id @default(cuid())
+  email                 String                   @unique
+  name                  String?
+  passwordHash          String?
+  googleId              String?
+  emailVerified         Boolean                  @default(false)
+  emailVerificationCode String?
+  resetTokenHash        String?
+  resetTokenExpiry      DateTime?
+  role                  Role                     @default(USER)
+  adminRole             AdminRole?
+  status                UserStatus               @default(ACTIVE)
+  profile               Profile?
+  covers                Cover[]
+  auditLogs             AuditLog[]               @relation("AdminAuditLogs")
+  requestedVerifications UniversityVerification[] @relation("VerificationRequester")
+  reviewedVerifications  UniversityVerification[] @relation("VerificationReviewer")
+  resolvedAlerts         OperationalAlert[]       @relation("AlertResolver")
+  raisedTickets          SupportTicket[]          @relation("RaisedSupportTickets")
+  assignedTickets        SupportTicket[]          @relation("AssignedSupportTickets")
+  abuseSignals           AbuseSignal[]            @relation("SignalUser")
+  reviewedAbuseSignals   AbuseSignal[]            @relation("SignalReviewer")
+  refreshTokens          RefreshToken[]
+  sessions               Session[]
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
 }
 
 model Profile {
@@ -27,7 +43,6 @@ model Profile {
   studentId    String
   department   String
   semester     String
-  session      String
   universityId String
   university   University @relation(fields: [universityId], references: [id])
   createdAt    DateTime   @default(now())
@@ -35,13 +50,15 @@ model Profile {
 }
 
 model University {
-  id        String    @id @default(cuid())
-  name      String
-  shortName String    @unique
-  logoUrl   String
-  type      UniType
-  profiles  Profile[]
-  createdAt DateTime  @default(now())
+  id             String    @id @default(cuid())
+  name           String
+  shortName      String    @unique
+  logoUrl        String
+  pendingLogoUrl String?
+  type           UniType
+  profiles       Profile[]
+  verifications  UniversityVerification[]
+  createdAt      DateTime  @default(now())
 }
 
 model Cover {
@@ -55,7 +72,138 @@ model Cover {
   createdAt  DateTime @default(now())
 }
 
+model Broadcast {
+  id        String   @id @default("global")
+  message   String
+  isActive  Boolean  @default(false)
+  type      String   @default("info")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  entityType String
+  entityId   String?
+  details    Json?
+  createdAt  DateTime @default(now())
+  admin      User     @relation("AdminAuditLogs", fields: [adminId], references: [id], onDelete: Cascade)
+}
+
+model UniversityVerification {
+  id              String             @id @default(cuid())
+  universityId    String
+  requesterId     String?
+  reviewedById    String?
+  requestType     VerificationType   @default(LOGO)
+  status          VerificationStatus @default(PENDING)
+  note            String?
+  currentLogoUrl  String?
+  proposedLogoUrl String?
+  metadata        Json?
+  createdAt       DateTime           @default(now())
+  reviewedAt      DateTime?
+  university      University         @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  requester       User?              @relation("VerificationRequester", fields: [requesterId], references: [id], onDelete: SetNull)
+  reviewedBy      User?              @relation("VerificationReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+}
+
+model OperationalAlert {
+  id           String        @id @default(cuid())
+  severity     AlertSeverity @default(INFO)
+  source       String
+  message      String
+  metadata     Json?
+  isResolved   Boolean       @default(false)
+  createdAt    DateTime      @default(now())
+  resolvedAt   DateTime?
+  resolvedById String?
+  resolvedBy   User?         @relation("AlertResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
+}
+
+model FeatureFlag {
+  key         String   @id
+  name        String
+  description String?
+  enabled     Boolean  @default(false)
+  rollout     Int      @default(100)
+  targets     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SupportTicket {
+  id           String         @id @default(cuid())
+  userId       String?
+  email        String
+  subject      String
+  message      String
+  status       TicketStatus   @default(OPEN)
+  priority     TicketPriority @default(NORMAL)
+  category     String?
+  assignedToId String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  resolvedAt   DateTime?
+  user         User?          @relation("RaisedSupportTickets", fields: [userId], references: [id], onDelete: SetNull)
+  assignedTo   User?          @relation("AssignedSupportTickets", fields: [assignedToId], references: [id], onDelete: SetNull)
+}
+
+model AbuseSignal {
+  id           String   @id @default(cuid())
+  userId       String
+  type         String
+  score        Int      @default(0)
+  reason       String
+  reviewed     Boolean  @default(false)
+  reviewedAt   DateTime?
+  reviewedById String?
+  createdAt    DateTime @default(now())
+  user         User     @relation("SignalUser", fields: [userId], references: [id], onDelete: Cascade)
+  reviewedBy   User?    @relation("SignalReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  revoked   Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deviceName   String?
+  userAgent    String?
+  ipAddress    String?
+  lastActivity DateTime @default(now())
+  createdAt    DateTime @default(now())
+}
+
+model SignedUrl {
+  id        String   @id @default(cuid())
+  signature String   @unique
+  fileType  String
+  filePath  String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model TokenBlacklist {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
 enum Role {
+  USER
   STUDENT
   ADMIN
 }
@@ -63,4 +211,47 @@ enum Role {
 enum UniType {
   PUBLIC
   PRIVATE
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  MODERATOR
+  SUPPORT
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum VerificationType {
+  LOGO
+  METADATA
+  OWNERSHIP
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
 }

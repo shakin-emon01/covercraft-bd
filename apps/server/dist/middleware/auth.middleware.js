@@ -1,10 +1,16 @@
-import jwt from 'jsonwebtoken';
-export const authenticate = (req, res, next) => {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.requireAdmin = exports.authenticate = void 0;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const authenticate = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token)
         return res.status(401).json({ message: 'Unauthorized' });
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
         req.userId = decoded.userId;
         req.userRole = decoded.role;
         next();
@@ -13,9 +19,10 @@ export const authenticate = (req, res, next) => {
         return res.status(401).json({ message: 'Invalid token' });
     }
 };
-export const requireAdmin = (req, res, next) => {
+exports.authenticate = authenticate;
+const requireAdmin = (req, res, next) => {
     if (req.userRole !== 'ADMIN')
         return res.status(403).json({ message: 'Forbidden' });
     next();
 };
-//# sourceMappingURL=auth.middleware.js.map
+exports.requireAdmin = requireAdmin;
