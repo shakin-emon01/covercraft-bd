@@ -21,19 +21,13 @@ dotenv.config();
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
 
+app.set('trust proxy', 1);
+
 // 1. Security Headers (Helmet)
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        styleSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
-      },
-    },
-    crossOriginResourcePolicy: false,
-    hsts: { maxAge: 31536000, includeSubDomains: true },
+    crossOriginOpenerPolicy: { policy: "same-origin-allow-popups" },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 
