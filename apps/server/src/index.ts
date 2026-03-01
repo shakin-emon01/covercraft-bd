@@ -21,7 +21,7 @@ dotenv.config();
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
 
-app.set('trust proxy', 1);
+app.set('trust proxy', true);
 
 // 1. Security Headers (Helmet)
 app.use(
@@ -44,12 +44,14 @@ const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 300,
   message: { message: 'Too many requests from this IP, please try again later.' },
+  validate: { xForwardedForHeader: false },
 });
 
 const exportLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 30,
   message: { message: 'Export limit reached. Please wait a few minutes to generate more covers.' },
+  validate: { xForwardedForHeader: false },
 });
 
 // Apply global limiter to all routes
