@@ -2,7 +2,8 @@ import express, { type Express } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
-import rateLimit from 'express-rate-limit';
+import jwt from 'jsonwebtoken';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import path from 'path';
 
 import authRoutes from './routes/auth.routes';
@@ -21,7 +22,16 @@ dotenv.config();
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
 
-app.set('trust proxy', true);
+const trustProxyRaw = String(process.env.TRUST_PROXY ?? '1').trim().toLowerCase();
+const resolvedTrustProxy: boolean | number =
+  trustProxyRaw === 'true'
+    ? true
+    : trustProxyRaw === 'false'
+      ? false
+      : Number.isNaN(Number(trustProxyRaw))
+        ? 1
+        : Number(trustProxyRaw);
+app.set('trust proxy', resolvedTrustProxy);
 
 // 1. Security Headers (Helmet)
 app.use(
@@ -40,22 +50,76 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(checkTokenBlacklist);
 
 // 4. Rate Limiters (Abuse Protection)
+const extractUserIdFromBearerToken = (authorizationHeader: unknown): string | null => {
+  if (typeof authorizationHeader !== 'string') return null;
+  const [scheme, token] = authorizationHeader.split(' ');
+  if (scheme !== 'Bearer' || !token || !process.env.JWT_SECRET) return null;
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET) as { userId?: unknown };
+    return typeof decoded?.userId === 'string' ? decoded.userId : null;
+  } catch {
+    return null;
+  }
+};
+
+const buildRateLimitKey = (req: express.Request) => {
+  const userId = extractUserIdFromBearerToken(req.headers.authorization);
+  if (userId) return `user:${userId}`;
+
+  const forwardedFor = String(req.headers['x-forwarded-for'] ?? '').split(',')[0]?.trim();
+  const rawIp = forwardedFor || req.ip || req.socket.remoteAddress || '';
+  return `ip:${ipKeyGenerator(rawIp)}`;
+};
+
+const rateLimitHandler = (req: express.Request, res: express.Response) => {
+  const resetTime = (req as any)?.rateLimit?.resetTime;
+  const resetSeconds = Math.ceil(Math.max(((resetTime instanceof Date ? resetTime.getTime() : Date.now()) - Date.now()), 0) / 1000);
+  res.status(429).json({
+    message: 'Too many requests. Please try again shortly.',
+    retryAfter: resetSeconds,
+  });
+};
+
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 300,
-  message: { message: 'Too many requests from this IP, please try again later.' },
+  max: 1200,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: buildRateLimitKey,
+  handler: rateLimitHandler,
+  validate: { xForwardedForHeader: false },
+  skip: (req) => req.path.startsWith('/admin'),
+});
+
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 2400,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: buildRateLimitKey,
+  handler: rateLimitHandler,
   validate: { xForwardedForHeader: false },
 });
 
 const exportLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 30,
-  message: { message: 'Export limit reached. Please wait a few minutes to generate more covers.' },
+  max: 60,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+  keyGenerator: buildRateLimitKey,
+  handler: (_req, res) => {
+    return res.status(429).json({
+      message: 'Export limit reached. Please wait a few minutes to generate more covers.',
+    });
+  },
   validate: { xForwardedForHeader: false },
 });
 
 // Apply global limiter to all routes
 app.use('/api', globalLimiter);
+// Dedicated limiter for admin dashboard APIs (high volume, authenticated)
+app.use('/api/admin', adminLimiter);
 // Apply strict limiter to heavy export routes
 app.use('/api/covers/generate', exportLimiter);
 app.use('/api/covers/:id/download', exportLimiter);

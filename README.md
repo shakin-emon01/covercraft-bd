@@ -270,6 +270,23 @@ pnpm seed
 pnpm typecheck
 ```
 
+### Bulk University Logo Sync (shortName based)
+
+If you keep logo files in `apps/server/uploads/logos/by-short-name`, you can auto-map them by university short name.
+
+```bash
+# Dry run (see what will change)
+pnpm --filter server run sync:logos -- --dry-run
+
+# Apply updates
+pnpm --filter server run sync:logos
+```
+
+Filename rule:
+- `DU.png` -> matches `shortName = "DU"`
+- `NSU.jpg` -> matches `shortName = "NSU"`
+- `BAUSTKhulna.webp` -> matches `shortName = "BAUST Khulna"` (non-alphanumeric characters are ignored for matching)
+
 ---
 
 ## 📦 Key Dependencies
@@ -348,6 +365,8 @@ DATABASE_URL=postgresql://user:password@host:port/db
 JWT_SECRET=your_jwt_secret
 CLIENT_URL=http://localhost:5173
 PORT=5000
+TRUST_PROXY=1
+API_PUBLIC_URL=http://localhost:5000
 ```
 
 ### Frontend (`apps/web/.env`)

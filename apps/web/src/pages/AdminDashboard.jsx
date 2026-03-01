@@ -64,6 +64,7 @@ export default function AdminDashboard() {
   // UI states
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [warning, setWarning] = useState("");
   const [broadcasting, setBroadcasting] = useState(false);
   const [massActionLoading, setMassActionLoading] = useState(false);
 
@@ -81,31 +82,42 @@ export default function AdminDashboard() {
       navigate("/login");
       return;
     }
-    fetchData();
+    fetchData(true);
   }, [user, navigate]);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (showLoader = false) => {
+    if (showLoader) setLoading(true);
     try {
-      const responses = await Promise.allSettled([
-        getAdminStats(),
-        getAllUsers(),
-        getPendingLogos(),
-        getAdminUnis(),
-        getTemplateAnalytics(),
-        getActiveBroadcast(),
-        getAbuseRiskUsers(),
-        getUniversityVerifications(),
-        getTemplatePerformanceAnalytics(),
-        getOperationalAlerts(),
-        getFeatureFlags(),
-        getSupportTickets(),
-        getSupportTicketStats(),
-        getAuditLogs(),
-        getRoleMatrix(),
-      ]);
+      const requests = [
+        { label: "stats", run: getAdminStats },
+        { label: "users", run: getAllUsers },
+        { label: "logo requests", run: getPendingLogos },
+        { label: "universities", run: getAdminUnis },
+        { label: "template analytics", run: getTemplateAnalytics },
+        { label: "broadcast", run: getActiveBroadcast },
+        { label: "abuse risk", run: getAbuseRiskUsers },
+        { label: "verifications", run: getUniversityVerifications },
+        { label: "template performance", run: getTemplatePerformanceAnalytics },
+        { label: "operational alerts", run: getOperationalAlerts },
+        { label: "feature flags", run: getFeatureFlags },
+        { label: "support tickets", run: getSupportTickets },
+        { label: "ticket stats", run: getSupportTicketStats },
+        { label: "audit logs", run: getAuditLogs },
+        { label: "role matrix", run: getRoleMatrix },
+      ];
+      const responses = await Promise.allSettled(requests.map((item) => item.run()));
 
       const dataOrNull = (result) => (result.status === "fulfilled" ? result.value?.data : null);
+      const failures = responses
+        .map((result, index) => {
+          if (result.status === "fulfilled") return null;
+          const statusCode = result.reason?.response?.status;
+          return {
+            label: requests[index].label,
+            statusCode,
+          };
+        })
+        .filter(Boolean);
 
       const statsData = dataOrNull(responses[0]);
       const usersData = dataOrNull(responses[1]);
@@ -123,31 +135,51 @@ export default function AdminDashboard() {
       const auditData = dataOrNull(responses[13]);
       const roleMatrixData = dataOrNull(responses[14]);
 
-      if (statsData) setStats(statsData);
-      setUsers(Array.isArray(usersData) ? usersData : []);
-      setRequests(Array.isArray(logosData) ? logosData : []);
-      setUnis(Array.isArray(unisData) ? unisData : []);
-      setAnalytics(Array.isArray(analyticsData) ? analyticsData : []);
-      setAbuseRisk(Array.isArray(abuseData) ? abuseData : []);
-      setVerifications(Array.isArray(verificationsData) ? verificationsData : []);
-      setPerformanceAnalytics(Array.isArray(performanceData?.leaderboard) ? performanceData.leaderboard : []);
-      setAlerts(Array.isArray(alertsData) ? alertsData : []);
-      setFlags(Array.isArray(flagsData) ? flagsData : []);
-      setTickets(Array.isArray(ticketsData) ? ticketsData : []);
-      setTicketStats(ticketStatsData || null);
-      setAuditLogs(Array.isArray(auditData) ? auditData : []);
-      setRoleMatrix(roleMatrixData || {});
+      if (statsData && typeof statsData === "object") setStats(statsData);
+      if (Array.isArray(usersData)) setUsers(usersData);
+      if (Array.isArray(logosData)) setRequests(logosData);
+      if (Array.isArray(unisData)) setUnis(unisData);
+      if (Array.isArray(analyticsData)) setAnalytics(analyticsData);
+      if (Array.isArray(abuseData)) setAbuseRisk(abuseData);
+      if (Array.isArray(verificationsData)) setVerifications(verificationsData);
+      if (Array.isArray(performanceData?.leaderboard)) setPerformanceAnalytics(performanceData.leaderboard);
+      if (Array.isArray(alertsData)) setAlerts(alertsData);
+      if (Array.isArray(flagsData)) setFlags(flagsData);
+      if (Array.isArray(ticketsData)) setTickets(ticketsData);
+      if (ticketStatsData && typeof ticketStatsData === "object") setTicketStats(ticketStatsData);
+      if (Array.isArray(auditData)) setAuditLogs(auditData);
+      if (roleMatrixData && typeof roleMatrixData === "object" && !Array.isArray(roleMatrixData)) setRoleMatrix(roleMatrixData);
 
-      setBroadcast({
-        message: broadcastData?.message || "",
-        isActive: Boolean(broadcastData?.isActive),
-        type: broadcastData?.type || "info",
-      });
-      setError("");
-    } catch {
+      if (broadcastData && typeof broadcastData === "object") {
+        setBroadcast({
+          message: broadcastData?.message || "",
+          isActive: Boolean(broadcastData?.isActive),
+          type: broadcastData?.type || "info",
+        });
+      }
+
+      const hasAuthFailure = failures.some((item) => item?.statusCode === 401 || item?.statusCode === 403);
+      const hasRateLimitFailure = failures.some((item) => item?.statusCode === 429);
+
+      if (hasAuthFailure) {
+        setError("Admin access check failed. Please login again.");
+        setWarning("");
+      } else if (failures.length > 0) {
+        const failedLabels = failures.map((item) => item.label).join(", ");
+        const baseMessage = hasRateLimitFailure
+          ? "Some admin data is temporarily rate-limited. Showing available sections only."
+          : "Some admin sections could not be loaded right now.";
+        setWarning(`${baseMessage} Failed: ${failedLabels}.`);
+        setError("");
+      } else {
+        setWarning("");
+        setError("");
+      }
+    } catch (err) {
+      console.error("Admin dashboard fetch failed:", err);
       setError("Failed to load admin data. Are you sure you are an Admin?");
     } finally {
-      setLoading(false);
+      if (showLoader) setLoading(false);
     }
   };
 
@@ -167,7 +199,7 @@ export default function AdminDashboard() {
   const handleResolveLogo = async (id, action) => {
     try {
       await resolveLogo(id, action);
-      fetchData();
+      fetchData(false);
     } catch {
       alert("Failed to process request.");
     }
@@ -177,7 +209,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Are you sure you want to delete this user? This action cannot be undone.")) return;
     try {
       await deleteUser(id);
-      fetchData();
+      fetchData(false);
       alert("User deleted successfully.");
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete user.");
@@ -196,7 +228,7 @@ export default function AdminDashboard() {
       }
       setUniForm({ name: "", shortName: "", logoUrl: "", type: "PUBLIC" });
       setEditingUniId(null);
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Operation failed.");
     }
@@ -217,7 +249,7 @@ export default function AdminDashboard() {
     if (!window.confirm("Delete this university?")) return;
     try {
       await deleteUni(id);
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete university.");
     }
@@ -237,7 +269,7 @@ export default function AdminDashboard() {
     try {
       await massUserAction({ userIds: selectedUserIds, action });
       setSelectedUserIds([]);
-      fetchData();
+      fetchData(false);
       alert(`Mass action ${action} completed.`);
     } catch (err) {
       alert(err.response?.data?.message || "Mass action failed.");
@@ -249,7 +281,7 @@ export default function AdminDashboard() {
   const handleUpdateUserAccess = async (item, patchData) => {
     try {
       await updateUserAccess(item.id, patchData);
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to update access.");
     }
@@ -260,7 +292,7 @@ export default function AdminDashboard() {
     try {
       await createAbuseSignal({ ...abuseForm, score: Number(abuseForm.score) || 0 });
       setAbuseForm({ userId: "", type: "SPAM", score: 10, reason: "" });
-      fetchData();
+      fetchData(false);
       alert("Abuse signal created.");
     } catch (err) {
       alert(err.response?.data?.message || "Failed to create abuse signal.");
@@ -270,7 +302,7 @@ export default function AdminDashboard() {
   const handleReviewVerification = async (verificationId, action) => {
     try {
       await reviewUniversityVerification(verificationId, action);
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to review verification.");
     }
@@ -281,7 +313,7 @@ export default function AdminDashboard() {
     try {
       await createOperationalAlert(alertForm);
       setAlertForm({ severity: "INFO", source: "manual", message: "" });
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to create alert.");
     }
@@ -290,7 +322,7 @@ export default function AdminDashboard() {
   const handleResolveAlert = async (id) => {
     try {
       await resolveOperationalAlert(id);
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to resolve alert.");
     }
@@ -304,7 +336,7 @@ export default function AdminDashboard() {
         rollout: Number(flagForm.rollout) || 0,
       });
       setFlagForm({ key: "", name: "", description: "", enabled: false, rollout: 100 });
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to save feature flag.");
     }
@@ -314,7 +346,7 @@ export default function AdminDashboard() {
     if (!window.confirm(`Delete flag "${key}"?`)) return;
     try {
       await deleteFeatureFlag(key);
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to delete flag.");
     }
@@ -325,7 +357,7 @@ export default function AdminDashboard() {
     try {
       await createAdminSupportTicket(ticketForm);
       setTicketForm({ subject: "", message: "", priority: "NORMAL", email: user?.email || "" });
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to create ticket.");
     }
@@ -334,7 +366,7 @@ export default function AdminDashboard() {
   const handleUpdateTicket = async (ticketId, patchData) => {
     try {
       await updateSupportTicket(ticketId, patchData);
-      fetchData();
+      fetchData(false);
     } catch (err) {
       alert(err.response?.data?.message || "Failed to update ticket.");
     }
@@ -389,12 +421,20 @@ export default function AdminDashboard() {
           <h1 style={{ margin: 0, fontSize: isMobile ? 20 : 24, fontWeight: 900 }}>CoverCraft Admin</h1>
           <div style={{ fontSize: 12, color: "#94a3b8", letterSpacing: 1 }}>SYSTEM COMMAND CENTER</div>
         </div>
-        <button
-          onClick={() => navigate("/dashboard")}
-          style={{ padding: "8px 16px", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}
-        >
-          Exit Admin
-        </button>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            onClick={() => fetchData(false)}
+            style={{ padding: "8px 16px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}
+          >
+            Refresh Data
+          </button>
+          <button
+            onClick={() => navigate("/dashboard")}
+            style={{ padding: "8px 16px", background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", borderRadius: 8, cursor: "pointer", fontWeight: 600 }}
+          >
+            Exit Admin
+          </button>
+        </div>
       </div>
 
       <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: tabsPadding, display: "flex", gap: isMobile ? 18 : 30, overflowX: "auto", whiteSpace: "nowrap" }}>
@@ -421,6 +461,12 @@ export default function AdminDashboard() {
       </div>
 
       <div style={{ padding: contentPadding, maxWidth: 1200, margin: "0 auto" }}>
+        {warning && (
+          <div style={{ background: "#fef3c7", border: "1px solid #f59e0b", color: "#92400e", borderRadius: 10, padding: "10px 12px", marginBottom: 16, fontSize: 13, fontWeight: 600 }}>
+            {warning}
+          </div>
+        )}
+
         {/* OVERVIEW & SYSTEM SETTINGS */}
         {activeTab === "overview" && (
           <div>
@@ -1011,6 +1057,9 @@ export default function AdminDashboard() {
 }
 
 function StatCard({ title, value, color, onClick }) {
+  const hasValue = value !== null && value !== undefined;
+  const displayValue = hasValue ? value : "--";
+
   return (
     <div
       onClick={onClick}
@@ -1039,9 +1088,9 @@ function StatCard({ title, value, color, onClick }) {
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ fontSize: 13, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: 1 }}>{title}</div>
-        {onClick && <div style={{ color: color, fontSize: 18, fontWeight: "bold" }}>→</div>}
+        {onClick && <div style={{ color: color, fontSize: 18, fontWeight: "bold" }}>{"->"}</div>}
       </div>
-      <div style={{ fontSize: 36, fontWeight: 900, color: "#0f172a", margin: "10px 0 0" }}>{value || 0}</div>
+      <div style={{ fontSize: 36, fontWeight: 900, color: hasValue ? "#0f172a" : "#64748b", margin: "10px 0 0" }}>{displayValue}</div>
     </div>
   );
 }
