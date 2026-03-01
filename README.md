@@ -367,7 +367,12 @@ CLIENT_URL=http://localhost:5173
 PORT=5000
 TRUST_PROXY=1
 API_PUBLIC_URL=http://localhost:5000
+UPLOAD_PATH=./uploads
 ```
+
+Production note:
+- For Railway, mount a persistent volume and set `UPLOAD_PATH` to that mounted path (for example `/data/uploads`).
+- Without persistent storage, uploaded logos in `/uploads/*` can disappear after redeploy/restart.
 
 ### Frontend (`apps/web/.env`)
 ```env

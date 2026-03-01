@@ -4,7 +4,6 @@ import dotenv from 'dotenv';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
-import path from 'path';
 
 import authRoutes from './routes/auth.routes';
 import securityRoutes from './routes/security.routes';
@@ -16,6 +15,7 @@ import adminRoutes from './routes/admin.routes';
 import systemRoutes from './routes/system.routes';
 import { checkTokenBlacklist } from './middleware/security.middleware';
 import prisma from './lib/prisma';
+import { getUploadsRoot } from './lib/uploads';
 
 dotenv.config();
 
@@ -125,7 +125,7 @@ app.use('/api/covers/generate', exportLimiter);
 app.use('/api/covers/:id/download', exportLimiter);
 
 // 5. Static Uploads Folder
-app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+app.use('/uploads', express.static(getUploadsRoot()));
 
 // 6. Routes
 app.use('/api/auth', authRoutes);

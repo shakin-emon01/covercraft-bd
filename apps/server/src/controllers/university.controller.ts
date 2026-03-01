@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
 import prisma from '../lib/prisma';
+import { buildUploadUrl, ensureUploadsDir } from '../lib/uploads';
 
 export const getAllUniversities = async (req: Request, res: Response) => {
   try {
@@ -66,18 +67,14 @@ export const submitLogoRequest = async (req: any, res: Response) => {
     const newFileName = `req-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
 
     // Create folder if not exists
-    const uploadDir = path.join(process.cwd(), 'uploads/requests');
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
+    const uploadDir = ensureUploadsDir('requests');
 
     // Save strictly validated file to disk.
     const filePath = path.join(uploadDir, newFileName);
     fs.writeFileSync(filePath, buffer);
 
     // Update database
-    const baseUrl = process.env.API_PUBLIC_URL || `http://localhost:${process.env.PORT || 5000}`;
-    const pendingLogoUrl = `${baseUrl}/uploads/requests/${newFileName}`;
+    const pendingLogoUrl = buildUploadUrl('requests', newFileName);
 
     await prisma.university.update({
       where: { id: req.params.id },

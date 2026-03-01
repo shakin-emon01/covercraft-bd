@@ -10,9 +10,9 @@ import type {
 } from '@prisma/client';
 import multer from 'multer';
 import path from 'path';
-import fs from 'fs';
 import prisma from '../lib/prisma';
 import { ADMIN_ROLE_PERMISSIONS } from '../middleware/auth.middleware';
+import { buildUploadUrl, ensureUploadsDir, promoteRequestLogoIfNeeded } from '../lib/uploads';
 
 const DEFAULT_TAKE = 200;
 
@@ -547,10 +547,11 @@ export const reviewUniversityVerification = async (req: any, res: Response) => {
     if (verification.status !== 'PENDING') return res.status(400).json({ message: 'This request is already reviewed.' });
 
     if (action === 'APPROVE' && verification.requestType === 'LOGO' && verification.proposedLogoUrl) {
+      const approvedLogoUrl = promoteRequestLogoIfNeeded(verification.proposedLogoUrl);
       await prisma.university.update({
         where: { id: verification.universityId },
         data: {
-          logoUrl: verification.proposedLogoUrl,
+          logoUrl: approvedLogoUrl,
           pendingLogoUrl: null,
         },
       });
@@ -602,9 +603,10 @@ export const reviewLogoRequest = async (req: any, res: Response) => {
     }
 
     if (action === 'APPROVE') {
+      const approvedLogoUrl = promoteRequestLogoIfNeeded(university.pendingLogoUrl);
       await prisma.university.update({
         where: { id },
-        data: { logoUrl: university.pendingLogoUrl, pendingLogoUrl: null },
+        data: { logoUrl: approvedLogoUrl, pendingLogoUrl: null },
       });
     } else {
       await prisma.university.update({
@@ -1104,8 +1106,7 @@ export const updateSupportTicket = async (req: any, res: Response) => {
 // ==================== UNIVERSITY LOGO UPLOAD ====================
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    const uploadDir = path.join(process.cwd(), 'uploads/logos');
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+    const uploadDir = ensureUploadsDir('logos');
     cb(null, uploadDir);
   },
   filename: (_req, file, cb) => {
@@ -1128,8 +1129,7 @@ export const uploadUniversityLogo = async (req: any, res: Response) => {
     const { id } = req.params;
     if (!req.file) return res.status(400).json({ message: 'No image file provided' });
 
-    const baseUrl = process.env.API_PUBLIC_URL || `http://localhost:${process.env.PORT || 5000}`;
-    const logoUrl = `${baseUrl}/uploads/logos/${req.file.filename}`;
+    const logoUrl = buildUploadUrl('logos', req.file.filename);
 
     const university = await prisma.university.update({
       where: { id },
