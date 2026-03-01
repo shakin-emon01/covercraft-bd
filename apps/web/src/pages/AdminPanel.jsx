@@ -163,7 +163,7 @@ export default function AdminPanel() {
 
           {pendingRequests.map((req) => (
             <div key={req.id} style={{ display: 'flex', alignItems: 'center', gap: 15, padding: 15, background: '#f8fafc', borderRadius: 8, marginTop: 10, border: '1px solid #cbd5e1' }}>
-              <img src={req.pendingLogoUrl} alt="Pending" style={{ width: 60, height: 60, objectFit: 'contain', background: '#fff', padding: 5, borderRadius: 6, border: '1px solid #e2e8f0' }} crossOrigin="anonymous" />
+              <img src={req.pendingLogoUrl} alt="Pending" style={{ width: 60, height: 60, objectFit: 'contain', background: '#fff', padding: 5, borderRadius: 6, border: '1px solid #e2e8f0' }} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700, fontSize: 14 }}>{req.name} ({req.shortName})</div>
                 <div style={{ fontSize: 11, color: '#64748b' }}>User suggested a new logo.</div>

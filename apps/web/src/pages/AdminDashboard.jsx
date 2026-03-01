@@ -739,7 +739,7 @@ export default function AdminDashboard() {
                     {unis.map((item) => (
                       <tr key={item.id} style={{ borderBottom: "1px solid #f1f5f9" }}>
                         <td style={tdStyle}>
-                          <img src={item.logoUrl || "https://via.placeholder.com/40?text=No+Logo"} alt="logo" style={{ width: 40, height: 40, objectFit: "contain" }} crossOrigin="anonymous" />
+                          <img src={item.logoUrl || "/vite.svg"} alt="logo" style={{ width: 40, height: 40, objectFit: "contain" }} />
                         </td>
                         <td style={tdStyle}><strong>{item.name}</strong></td>
                         <td style={tdStyle}>{item.shortName}</td>
@@ -777,7 +777,7 @@ export default function AdminDashboard() {
               <div style={{ display: "flex", flexDirection: "column", gap: 15 }}>
                 {requests.map((request) => (
                   <div key={request.id} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: 20, padding: 20, background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0" }}>
-                    <img src={request.pendingLogoUrl} alt="Pending" style={{ width: 80, height: 80, objectFit: "contain", background: "#f8fafc", padding: 10, borderRadius: 8, border: "1px solid #cbd5e1" }} crossOrigin="anonymous" />
+                    <img src={request.pendingLogoUrl} alt="Pending" style={{ width: 80, height: 80, objectFit: "contain", background: "#f8fafc", padding: 10, borderRadius: 8, border: "1px solid #cbd5e1" }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, fontSize: 18, color: "#0f172a" }}>{request.name}</div>
                       <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Short Name: <strong>{request.shortName}</strong></div>
