@@ -39,11 +39,28 @@ export const syncUniversityLogo = async (
   }
 
   try {
-    const hipoUrl = `https://universities.hipolabs.com/search?name=${encodeURIComponent(
+    const query = `search?name=${encodeURIComponent(
       universityName
     )}&country=Bangladesh`;
+    const hipoUrls = [`https://universities.hipolabs.com/${query}`, `http://universities.hipolabs.com/${query}`];
 
-    const { data } = await axios.get<HipoUniversityItem[]>(hipoUrl, { timeout: 10000 });
+    let data: HipoUniversityItem[] | null = null;
+    for (const hipoUrl of hipoUrls) {
+      try {
+        const response = await axios.get<HipoUniversityItem[]>(hipoUrl, { timeout: 10000 });
+        data = response.data;
+        break;
+      } catch (error) {
+        const canFallbackToHttp =
+          hipoUrl.startsWith('https://') &&
+          axios.isAxiosError(error) &&
+          ['ECONNREFUSED', 'ETIMEDOUT', 'ECONNRESET'].includes(error.code ?? '');
+
+        if (!canFallbackToHttp) {
+          throw error;
+        }
+      }
+    }
 
     if (!Array.isArray(data) || data.length === 0) {
       return currentLogoUrl;
@@ -76,7 +93,13 @@ export const syncUniversityLogo = async (
 
     return newLogoUrl;
   } catch (error) {
-    console.error(`[Logo Sync Failed] Could not fetch logo for ${universityName}:`, error);
+    const reason = axios.isAxiosError(error)
+      ? `${error.code ?? 'AXIOS_ERROR'}: ${error.message}`
+      : error instanceof Error
+        ? error.message
+        : 'Unknown error';
+
+    console.error(`[Logo Sync Failed] Could not fetch logo for ${universityName}: ${reason}`);
     return currentLogoUrl;
   }
 };
