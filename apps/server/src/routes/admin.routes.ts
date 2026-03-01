@@ -8,6 +8,7 @@ import {
   uploadUniversityLogo,
   getPendingLogoRequests,
   reviewLogoRequest,
+  reviewLogoRequestsBulk,
   deleteUser,
   getAllUniversitiesAdmin,
   addUniversity,
@@ -67,6 +68,7 @@ router.post('/verifications/:id/review', requirePermission('verification.manage'
 
 router.get('/logo-requests', requirePermission('logos.review'), getPendingLogoRequests);
 router.post('/logo-requests/:id/resolve', requirePermission('logos.review'), reviewLogoRequest);
+router.post('/logo-requests/bulk-resolve', requirePermission('logos.review'), reviewLogoRequestsBulk);
 
 router.get('/analytics/templates', requirePermission('analytics.view'), getTemplateAnalytics);
 router.get('/analytics/templates/performance', requirePermission('analytics.view'), getTemplatePerformanceAnalytics);

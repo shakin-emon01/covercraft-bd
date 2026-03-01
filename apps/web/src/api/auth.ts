@@ -70,6 +70,7 @@ export const getAdminStats = () => API.get('/admin/stats');
 export const getAllUsers = () => API.get('/admin/users');
 export const getPendingLogos = () => API.get('/admin/logo-requests');
 export const resolveLogo = (id: string, action: 'APPROVE' | 'REJECT') => API.post(`/admin/logo-requests/${id}/resolve`, { action });
+export const resolveLogoBulk = (data: Payload) => API.post('/admin/logo-requests/bulk-resolve', data);
 export const deleteUser = (id: string) => API.delete(`/admin/users/${id}`);
 export const getAdminUnis = () => API.get('/admin/universities');
 export const addUni = (data: Payload) => API.post('/admin/universities', data);

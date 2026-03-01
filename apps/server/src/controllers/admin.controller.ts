@@ -588,6 +588,48 @@ export const getPendingLogoRequests = async (_req: any, res: Response) => {
   }
 };
 
+const resolveLogoRequestByUniversityId = async (
+  universityId: string,
+  action: 'APPROVE' | 'REJECT',
+  reviewerId?: string
+) => {
+  const university = await prisma.university.findUnique({ where: { id: universityId } });
+  if (!university || !university.pendingLogoUrl) {
+    return { resolved: false as const, reason: 'No pending logo found' };
+  }
+
+  if (action === 'APPROVE') {
+    const approvedLogoUrl = promoteRequestLogoIfNeeded(university.pendingLogoUrl);
+    await prisma.university.update({
+      where: { id: universityId },
+      data: { logoUrl: approvedLogoUrl, pendingLogoUrl: null },
+    });
+  } else {
+    await prisma.university.update({
+      where: { id: universityId },
+      data: { pendingLogoUrl: null },
+    });
+  }
+
+  const latestPendingVerification = await prisma.universityVerification.findFirst({
+    where: { universityId, requestType: 'LOGO', status: 'PENDING' },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  if (latestPendingVerification) {
+    await prisma.universityVerification.update({
+      where: { id: latestPendingVerification.id },
+      data: {
+        status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+        reviewedById: reviewerId,
+        reviewedAt: new Date(),
+      },
+    });
+  }
+
+  return { resolved: true as const };
+};
+
 export const reviewLogoRequest = async (req: any, res: Response) => {
   try {
     const { id } = req.params;
@@ -597,42 +639,68 @@ export const reviewLogoRequest = async (req: any, res: Response) => {
       return res.status(400).json({ message: 'Invalid action' });
     }
 
-    const university = await prisma.university.findUnique({ where: { id } });
-    if (!university || !university.pendingLogoUrl) {
+    const result = await resolveLogoRequestByUniversityId(id, action, req.userId);
+    if (!result.resolved) {
       return res.status(404).json({ message: 'No pending logo found' });
-    }
-
-    if (action === 'APPROVE') {
-      const approvedLogoUrl = promoteRequestLogoIfNeeded(university.pendingLogoUrl);
-      await prisma.university.update({
-        where: { id },
-        data: { logoUrl: approvedLogoUrl, pendingLogoUrl: null },
-      });
-    } else {
-      await prisma.university.update({
-        where: { id },
-        data: { pendingLogoUrl: null },
-      });
-    }
-
-    const latestPendingVerification = await prisma.universityVerification.findFirst({
-      where: { universityId: id, requestType: 'LOGO', status: 'PENDING' },
-      orderBy: { createdAt: 'desc' },
-    });
-
-    if (latestPendingVerification) {
-      await prisma.universityVerification.update({
-        where: { id: latestPendingVerification.id },
-        data: {
-          status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
-          reviewedById: req.userId,
-          reviewedAt: new Date(),
-        },
-      });
     }
 
     await logAudit(req.userId, `LOGO_REQUEST_${action}`, 'UNIVERSITY', id);
     return res.json({ message: `Logo ${action}D successfully` });
+  } catch {
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+export const reviewLogoRequestsBulk = async (req: any, res: Response) => {
+  try {
+    const { action, ids, applyToAll } = req.body as {
+      action?: 'APPROVE' | 'REJECT';
+      ids?: string[];
+      applyToAll?: boolean;
+    };
+
+    if (!action || !['APPROVE', 'REJECT'].includes(action)) {
+      return res.status(400).json({ message: 'Invalid action' });
+    }
+
+    let targetIds: string[] = [];
+    if (applyToAll) {
+      const pending = await prisma.university.findMany({
+        where: { pendingLogoUrl: { not: null } },
+        select: { id: true },
+      });
+      targetIds = pending.map((item) => item.id);
+    } else {
+      const incoming = Array.isArray(ids) ? ids : [];
+      targetIds = [...new Set(incoming.map((value) => String(value).trim()).filter(Boolean))];
+    }
+
+    if (!targetIds.length) {
+      return res.status(400).json({ message: 'No target logo requests found.' });
+    }
+
+    let resolved = 0;
+    let skipped = 0;
+
+    for (const universityId of targetIds) {
+      const result = await resolveLogoRequestByUniversityId(universityId, action, req.userId);
+      if (result.resolved) resolved += 1;
+      else skipped += 1;
+    }
+
+    await logAudit(req.userId, `LOGO_REQUEST_BULK_${action}`, 'UNIVERSITY', undefined, {
+      resolved,
+      skipped,
+      totalInput: targetIds.length,
+      applyToAll: Boolean(applyToAll),
+    });
+
+    return res.json({
+      message: `Bulk logo ${action.toLowerCase()} completed.`,
+      resolved,
+      skipped,
+      totalInput: targetIds.length,
+    });
   } catch {
     return res.status(500).json({ message: 'Server error' });
   }

@@ -7,6 +7,7 @@ import {
   getAllUsers,
   getPendingLogos,
   resolveLogo,
+  resolveLogoBulk,
   deleteUser,
   getAdminUnis,
   addUni,
@@ -67,6 +68,7 @@ export default function AdminDashboard() {
   const [warning, setWarning] = useState("");
   const [broadcasting, setBroadcasting] = useState(false);
   const [massActionLoading, setMassActionLoading] = useState(false);
+  const [bulkLogoLoading, setBulkLogoLoading] = useState(false);
 
   // University form state
   const [uniForm, setUniForm] = useState({ name: "", shortName: "", logoUrl: "", type: "PUBLIC" });
@@ -76,6 +78,7 @@ export default function AdminDashboard() {
   const [flagForm, setFlagForm] = useState({ key: "", name: "", description: "", enabled: false, rollout: 100 });
   const [ticketForm, setTicketForm] = useState({ subject: "", message: "", priority: "NORMAL", email: user?.email || "" });
   const [abuseForm, setAbuseForm] = useState({ userId: "", type: "SPAM", score: 10, reason: "" });
+  const [selectedLogoRequestIds, setSelectedLogoRequestIds] = useState([]);
 
   useEffect(() => {
     if (!user) {
@@ -84,6 +87,10 @@ export default function AdminDashboard() {
     }
     fetchData(true);
   }, [user, navigate]);
+
+  useEffect(() => {
+    setSelectedLogoRequestIds((prev) => prev.filter((id) => requests.some((req) => req.id === id)));
+  }, [requests]);
 
   const fetchData = async (showLoader = false) => {
     if (showLoader) setLoading(true);
@@ -202,6 +209,52 @@ export default function AdminDashboard() {
       fetchData(false);
     } catch {
       alert("Failed to process request.");
+    }
+  };
+
+  const toggleSelectedLogoRequest = (id) => {
+    setSelectedLogoRequestIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const toggleSelectAllLogoRequests = () => {
+    if (selectedLogoRequestIds.length === requests.length) {
+      setSelectedLogoRequestIds([]);
+      return;
+    }
+    setSelectedLogoRequestIds(requests.map((item) => item.id));
+  };
+
+  const handleBulkResolveLogos = async (action, mode) => {
+    if (bulkLogoLoading) return;
+
+    const runAll = mode === "all";
+    const targetCount = runAll ? requests.length : selectedLogoRequestIds.length;
+    if (targetCount === 0) {
+      alert("Select at least one logo request first.");
+      return;
+    }
+
+    const confirmMessage = runAll
+      ? `Are you sure you want to ${action.toLowerCase()} all pending logo requests (${targetCount})?`
+      : `Are you sure you want to ${action.toLowerCase()} selected logo requests (${targetCount})?`;
+    if (!window.confirm(confirmMessage)) return;
+
+    setBulkLogoLoading(true);
+    try {
+      const payload = runAll
+        ? { action, applyToAll: true }
+        : { action, ids: selectedLogoRequestIds };
+
+      const { data } = await resolveLogoBulk(payload);
+      setSelectedLogoRequestIds([]);
+      fetchData(false);
+      alert(data?.message || `Bulk ${action.toLowerCase()} completed.`);
+    } catch (err) {
+      alert(err.response?.data?.message || "Bulk logo action failed.");
+    } finally {
+      setBulkLogoLoading(false);
     }
   };
 
@@ -775,8 +828,52 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 15 }}>
+                <div style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: isMobile ? 12 : 16, display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", gap: 10 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, fontWeight: 700, color: "#334155" }}>
+                    <input
+                      type="checkbox"
+                      checked={selectedLogoRequestIds.length > 0 && selectedLogoRequestIds.length === requests.length}
+                      onChange={toggleSelectAllLogoRequests}
+                    />
+                    Select All ({requests.length})
+                  </label>
+                  <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700 }}>
+                    Selected: {selectedLogoRequestIds.length}
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                    <button
+                      onClick={() => handleBulkResolveLogos("REJECT", "selected")}
+                      disabled={bulkLogoLoading || selectedLogoRequestIds.length === 0}
+                      style={{ padding: "8px 12px", background: "#fee2e2", color: "#b91c1c", border: "1px solid #fecaca", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                    >
+                      Reject Selected
+                    </button>
+                    <button
+                      onClick={() => handleBulkResolveLogos("APPROVE", "selected")}
+                      disabled={bulkLogoLoading || selectedLogoRequestIds.length === 0}
+                      style={{ padding: "8px 12px", background: "#dcfce7", color: "#15803d", border: "1px solid #bbf7d0", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                    >
+                      Approve Selected
+                    </button>
+                    <button
+                      onClick={() => handleBulkResolveLogos("APPROVE", "all")}
+                      disabled={bulkLogoLoading || requests.length === 0}
+                      style={{ padding: "8px 12px", background: "#2563eb", color: "#fff", border: "1px solid #1d4ed8", borderRadius: 8, fontWeight: 700, cursor: "pointer" }}
+                    >
+                      Approve All
+                    </button>
+                  </div>
+                </div>
+
                 {requests.map((request) => (
                   <div key={request.id} style={{ display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", gap: 20, padding: 20, background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0" }}>
+                    <label style={{ display: "flex", alignItems: "center", marginRight: 2 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedLogoRequestIds.includes(request.id)}
+                        onChange={() => toggleSelectedLogoRequest(request.id)}
+                      />
+                    </label>
                     <img src={request.pendingLogoUrl} alt="Pending" style={{ width: 80, height: 80, objectFit: "contain", background: "#f8fafc", padding: 10, borderRadius: 8, border: "1px solid #cbd5e1" }} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontWeight: 800, fontSize: 18, color: "#0f172a" }}>{request.name}</div>
