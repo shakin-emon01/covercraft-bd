@@ -37,8 +37,27 @@ export default function PrintView() {
   const theme = THEMES[cover.templateId] || THEMES[1];
 
   return (
-    <div style={{ background: "#ffffff", minHeight: "100vh", display: "flex" }}>
-      <CoverPage form={form} palette={palette} theme={theme} />
-    </div>
+    <>
+      <style>{`
+        @page {
+          size: A4 portrait;
+          margin: 20px 0;
+        }
+
+        html, body {
+          margin: 0;
+          padding: 0;
+          background: #ffffff;
+        }
+
+        body {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+      `}</style>
+      <div style={{ background: "#ffffff", minHeight: "100vh", display: "flex", justifyContent: "center", paddingTop: 16, paddingBottom: 16, boxSizing: "border-box" }}>
+        <CoverPage form={form} palette={palette} theme={theme} />
+      </div>
+    </>
   );
 }

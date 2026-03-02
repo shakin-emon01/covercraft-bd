@@ -58,6 +58,8 @@ export const getCovers = () => API.get('/covers');
 export const createCover = (data: Payload) => API.post('/covers', data);
 export const generateCover = (data: Payload) => API.post('/covers/generate', data);
 export const deleteCover = (id: string) => API.delete(`/covers/${id}`);
+export const getReviews = (params: Payload = {}) => API.get('/reviews', { params });
+export const createReview = (data: Payload) => API.post('/reviews', data);
 
 // Public API for shared covers
 export const getSharedCover = (id: string) => API.get(`/covers/shared/${id}`);
@@ -78,6 +80,9 @@ export const updateUni = (id: string, data: Payload) => API.put(`/admin/universi
 export const deleteUni = (id: string) => API.delete(`/admin/universities/${id}`);
 export const getTemplateAnalytics = () => API.get('/admin/analytics/templates');
 export const getTemplatePerformanceAnalytics = () => API.get('/admin/analytics/templates/performance');
+export const getAdminReviews = (take = 50) => API.get(`/admin/reviews?take=${take}`);
+export const createAdminReview = (data: Payload) => API.post('/admin/reviews', data);
+export const updateAdminReview = (id: string, data: Payload) => API.patch(`/admin/reviews/${id}`, data);
 export const updateBroadcast = (data: Payload) => API.post('/admin/broadcast', data);
 export const getActiveBroadcast = () => API.get('/system/broadcast');
 

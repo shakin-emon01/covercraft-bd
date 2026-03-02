@@ -13,6 +13,7 @@ import coverRoutes from './routes/cover.routes';
 import templateRoutes from './routes/template.routes';
 import adminRoutes from './routes/admin.routes';
 import systemRoutes from './routes/system.routes';
+import reviewRoutes from './routes/review.routes';
 import { checkTokenBlacklist } from './middleware/security.middleware';
 import prisma from './lib/prisma';
 import { getUploadsRoot } from './lib/uploads';
@@ -134,6 +135,7 @@ app.use('/api/universities', universityRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/covers', coverRoutes);
+app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/system', systemRoutes);
 

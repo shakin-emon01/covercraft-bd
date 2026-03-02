@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 import API, { generateCover, getProfile, getTemplates, getUniversities, generateBatchCovers } from "../api/auth";
 import { useViewport } from "../hooks/useViewport";
+import { useThemeMode } from "../hooks/useThemeMode";
 import html2canvas from "html2canvas";
 
 export const TEMPLATES = [
@@ -44,19 +45,19 @@ const defaultForm = {
   topicName: "Creation of Hospital Database with Primary Key and Foreign Key Constraints",
   courseCode: "CSE-312",
   courseTitle: "Database Management System Lab",
-  teacherName: "Syed Eftasum Alam",
-  teacherDesignation: "Lecturer",
+  teacherName: "Albert Einstein",
+  teacherDesignation: "Professor",
   teacherDept: "Dept. of Computer Science & Engineering",
   submissionMode: "individual",
-  studentName: "Shakin Ahammed Emon",
-  studentId: "241-15-111",
+  studentName: "Write Your Name Here...",
+  studentId: "Write Your ID Here...",
   groupMembers: [
-    { id: 1, name: "Shakin Ahammed Emon", studentId: "241-15-111" },
+    { id: 1, name: "Write Your Name Here...", studentId: "Write Your ID Here..." },
     { id: 2, name: "Member 2 Name", studentId: "ID-02" },
   ],
-  section: "66 - L2",
-  semester: "Spring '26",
-  submissionDate: "02.02.2026",
+  section: "Your Section Name...",
+  semester: "Spring 2026",
+  submissionDate: "02.03.2026",
 };
 
 const cleanFont = "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
@@ -83,6 +84,43 @@ export const THEMES = {
   13: { ...baseTheme, deco: "modern_tech" },
   14: { ...baseTheme, deco: "modern_luxury" },
   15: { ...baseTheme, deco: "bold_geometric" },
+};
+
+const designerUiTheme = {
+  light: {
+    appBg: "#edf1f5",
+    sidebarBg: "#ffffff",
+    sidebarBorder: "#eef2f6",
+    mutedText: "#7c8da1",
+    bodyText: "#0f172a",
+    panelBg: "#f8fafc",
+    panelBgSoft: "#f1f5f9",
+    panelBorder: "#e2e8f0",
+    inputBg: "#f8fafc",
+    inputBorder: "#dbe2ea",
+    inputText: "#0f172a",
+    placeholder: "#94a3b8",
+    previewCaption: "#9aa7b7",
+    statusBg: "#f8fafc",
+    shadow: "2px 0 14px rgba(15, 23, 42, 0.08)",
+  },
+  dark: {
+    appBg: "#020617",
+    sidebarBg: "#0f172a",
+    sidebarBorder: "#1e293b",
+    mutedText: "#94a3b8",
+    bodyText: "#e2e8f0",
+    panelBg: "#111827",
+    panelBgSoft: "#1e293b",
+    panelBorder: "#334155",
+    inputBg: "#0b1220",
+    inputBorder: "#334155",
+    inputText: "#e2e8f0",
+    placeholder: "#64748b",
+    previewCaption: "#94a3b8",
+    statusBg: "#111827",
+    shadow: "2px 0 18px rgba(2, 6, 23, 0.65)",
+  },
 };
 
 const normalize = (value) => String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -161,7 +199,7 @@ function CenterWatermark({ form, palette }) {
 
 function DUOfficialLayout({ form }) {
   return (
-    <div style={{ width: 794, minHeight: 1123, padding: "50px", boxSizing: "border-box", background: "#fff", position: "relative", fontFamily: "'Times New Roman', Times, serif", color: "#000" }}>
+    <div style={{ width: 794, minHeight: 1123, padding: "72px 50px 84px", boxSizing: "border-box", background: "#fff", position: "relative", fontFamily: "'Times New Roman', Times, serif", color: "#000" }}>
        <div style={{ position: "absolute", inset: 20, border: "2px solid #000" }} />
        <div style={{ position: "absolute", inset: 24, border: "1px solid #000" }} />
        <CenterWatermark form={form} palette={{primary: '#000'}} />
@@ -217,7 +255,7 @@ function DUOfficialLayout({ form }) {
 
 function DIUOfficialLayout({ form, palette }) {
   return (
-    <div style={{ width: 794, minHeight: 1123, padding: "50px", boxSizing: "border-box", background: "#fff", position: "relative", fontFamily: "'Times New Roman', Times, serif", color: "#000" }}>
+    <div style={{ width: 794, minHeight: 1123, padding: "72px 50px 84px", boxSizing: "border-box", background: "#fff", position: "relative", fontFamily: "'Times New Roman', Times, serif", color: "#000" }}>
        <div style={{ position: "absolute", inset: 16, border: `3px solid ${palette.secondary}` }} />
        <div style={{ position: "absolute", inset: 22, border: `1px solid ${palette.secondary}` }} />
        <CenterWatermark form={form} palette={palette} />
@@ -293,7 +331,7 @@ function DIUOfficialLayout({ form, palette }) {
 
 function JUOfficialLayout({ form, palette }) {
   return (
-    <div style={{ width: 794, minHeight: 1123, padding: "50px 60px", boxSizing: "border-box", background: "#fdfdfd", position: "relative", fontFamily: "'Georgia', serif", color: "#333" }}>
+    <div style={{ width: 794, minHeight: 1123, padding: "72px 60px 86px", boxSizing: "border-box", background: "#fdfdfd", position: "relative", fontFamily: "'Georgia', serif", color: "#333" }}>
        <CenterWatermark form={form} palette={palette} />
        <div style={{ position: "relative", zIndex: 1 }}>
            <div style={{ display: "flex", justifyContent: "center", position: "relative", marginBottom: 25 }}>
@@ -366,7 +404,7 @@ function JUOfficialLayout({ form, palette }) {
 
 function PolishedModernLayout({ form, palette }) {
   return (
-    <div style={{ width: 794, minHeight: 1123, padding: "70px 60px", boxSizing: "border-box", background: "#fafafa", position: "relative", fontFamily: cleanFont, color: "#1e293b", overflow: "hidden" }}>
+    <div style={{ width: 794, minHeight: 1123, padding: "84px 60px 96px", boxSizing: "border-box", background: "#fafafa", position: "relative", fontFamily: cleanFont, color: "#1e293b", overflow: "hidden" }}>
        <div style={{ position: "absolute", top: 0, left: 0, width: 350, height: 250, background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, clipPath: "polygon(0 0, 100% 0, 0 100%)", opacity: 0.95 }}/>
        <div style={{ position: "absolute", bottom: 0, right: 0, width: 350, height: 250, background: `linear-gradient(135deg, ${palette.secondary}, ${palette.primary})`, clipPath: "polygon(100% 100%, 100% 0, 0 100%)", opacity: 0.95 }}/>
        <CenterWatermark form={form} palette={palette} />
@@ -435,7 +473,7 @@ function PolishedModernLayout({ form, palette }) {
 
 function ModernLuxuryLayout({ form, palette }) {
   return (
-    <div style={{ width: 794, minHeight: 1123, padding: "60px", boxSizing: "border-box", background: "#fffdfa", position: "relative", color: "#1c1917" }}>
+    <div style={{ width: 794, minHeight: 1123, padding: "78px 60px 92px", boxSizing: "border-box", background: "#fffdfa", position: "relative", color: "#1c1917" }}>
        <CenterWatermark form={form} palette={palette} />
        <div style={{ position: "relative", zIndex: 1 }}>
            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", borderBottom: `2px solid ${palette.accent}`, paddingBottom: 20, marginBottom: 40 }}>
@@ -520,7 +558,7 @@ function BoldGeometricLayout({ form, palette }) {
        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 140, background: palette.primary, clipPath: "polygon(0 100%, 100% 100%, 100% 0, 0 60%)", zIndex: 0 }} />
        <CenterWatermark form={form} palette={palette} />
 
-       <div style={{ padding: "50px 60px", paddingTop: 140, position: "relative", zIndex: 1 }}>
+       <div style={{ padding: "68px 60px 92px", paddingTop: 156, position: "relative", zIndex: 1 }}>
            <div style={{ display: "flex", alignItems: "center", gap: 15, marginBottom: 30, background: "rgba(255,255,255,0.9)", padding: "10px 20px", borderRadius: 8, width: "fit-content", boxShadow: "0 4px 6px rgba(0,0,0,0.05)" }}>
               <Logo form={form} rounded={false} size={50} />
               <div style={{ fontSize: 20, fontWeight: 800, color: palette.primary, fontFamily: baseTheme.font }}>{form.university}</div>
@@ -682,7 +720,7 @@ export function CoverPage({ form, palette, theme }) {
     return (
       <div style={{ width: 794, minHeight: 1123, background: theme.pageBg, fontFamily: baseTheme.font, position: "relative", overflow: "hidden", boxSizing: "border-box" }}>
         <CenterWatermark form={form} palette={palette} />
-        <div style={{ padding: "40px 48px", position: "relative", zIndex: 1 }}>
+        <div style={{ padding: "58px 48px 76px", position: "relative", zIndex: 1 }}>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
             <div style={{ marginBottom: 12, display:"flex", justifyContent:"center" }}><Logo form={form} color={palette.primary} size={100} /></div>
             <div style={{ fontSize: 48, color: palette.primary, fontWeight: 700 }}>{form.university}</div>
@@ -753,7 +791,7 @@ export function CoverPage({ form, palette, theme }) {
       )}
       <CenterWatermark form={form} palette={palette} />
 
-      <div style={{ padding: "40px 50px", position: "relative", zIndex: 1 }}>
+      <div style={{ padding: "58px 50px 76px", position: "relative", zIndex: 1 }}>
         {theme.deco === "dhaka" ? (
           <div style={{ textAlign: "center", marginTop: 24, marginBottom: 30 }}>
             <div style={{ fontSize: 50, fontWeight: 700, marginBottom: 16 }}>{form.university}</div>
@@ -770,14 +808,24 @@ export function CoverPage({ form, palette, theme }) {
   );
 }
 
-function InputField({ label, field, multiline = false, form, updateForm }) {
+function InputField({ label, field, multiline = false, form, updateForm, ui = designerUiTheme.light }) {
   return (
     <div style={{ marginBottom: 13 }}>
-      <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: "#64748b", letterSpacing: 1.2, marginBottom: 5 }}>{label}</label>
+      <label style={{ display: "block", fontSize: 10, fontWeight: 700, color: ui.mutedText, letterSpacing: 1.2, marginBottom: 5 }}>{label}</label>
       {multiline ? (
-        <textarea value={form[field]} onChange={(e) => updateForm(field, e.target.value)} rows={3} style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1.5px solid #dbe2ea", fontSize: 12.5, resize: "vertical", boxSizing: "border-box", background: "#f8fafc" }} />
+        <textarea
+          value={form[field]}
+          onChange={(e) => updateForm(field, e.target.value)}
+          rows={3}
+          style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1.5px solid ${ui.inputBorder}`, fontSize: 12.5, resize: "vertical", boxSizing: "border-box", background: ui.inputBg, color: ui.inputText }}
+        />
       ) : (
-        <input type="text" value={form[field]} onChange={(e) => updateForm(field, e.target.value)} style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: "1.5px solid #dbe2ea", fontSize: 12.5, boxSizing: "border-box", background: "#f8fafc" }} />
+        <input
+          type="text"
+          value={form[field]}
+          onChange={(e) => updateForm(field, e.target.value)}
+          style={{ width: "100%", padding: "8px 10px", borderRadius: 6, border: `1.5px solid ${ui.inputBorder}`, fontSize: 12.5, boxSizing: "border-box", background: ui.inputBg, color: ui.inputText }}
+        />
       )}
     </div>
   );
@@ -796,9 +844,11 @@ const getSavedDraft = () => {
 export default function CoverDesigner() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const { isDark, toggleTheme } = useThemeMode();
   const { width, isMobile, isTablet } = useViewport();
   const exportRef = useRef(null);
   const csvInputRef = useRef(null);
+  const ui = isDark ? designerUiTheme.dark : designerUiTheme.light;
   
   const draft = getSavedDraft();
   const safeForm = draft?.form ? {
@@ -836,9 +886,13 @@ export default function CoverDesigner() {
           setForm((prev) => {
             const currentMembers = prev.groupMembers && prev.groupMembers.length > 0 ? prev.groupMembers : defaultForm.groupMembers;
             
-            // 🚀 FIXED: Array spreading bug (changed currentMembers to currentMembers)
+            // Use the first member as seed and preserve the rest.
             const seededGroupMembers = [
-              { ...currentMembers, name: profile.user?.name || user?.name || currentMembers.name, studentId: profile.studentId || currentMembers.studentId },
+              {
+                ...currentMembers[0],
+                name: profile.user?.name || user?.name || currentMembers[0]?.name,
+                studentId: profile.studentId || currentMembers[0]?.studentId,
+              },
               ...currentMembers.slice(1)
             ];
             
@@ -882,9 +936,8 @@ export default function CoverDesigner() {
     });
   }, [form.university, form.shortName, universities]);
 
-  // 🚀 FIXED: Fallback array/object bug
-  const palette = palettes.find((x) => x.id === selectedPalette) || palettes;
-  const theme = THEMES[selectedTemplate] || THEMES;
+  const palette = palettes.find((x) => x.id === selectedPalette) || COLOR_PALETTES[0];
+  const theme = THEMES[selectedTemplate] || THEMES[1];
   
   const sidebarWidth = isMobile ? "100%" : 326;
   const previewAvailableWidth = Math.max(320, width - (isMobile ? 24 : isTablet ? 380 : 420));
@@ -1109,67 +1162,75 @@ export default function CoverDesigner() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: isMobile ? "column-reverse" : "row", minHeight: "100vh", fontFamily: "'Segoe UI', sans-serif", background: "#edf1f5", overflowX: "hidden" }}>
-      <div style={{ width: sidebarWidth, background: "#fff", boxShadow: "2px 0 14px rgba(15, 23, 42, 0.08)", display: "flex", flexDirection: "column", overflow: "hidden", borderTop: isMobile ? "1px solid #e2e8f0" : "none" }}>
+    <div style={{ display: "flex", flexDirection: isMobile ? "column-reverse" : "row", minHeight: "100vh", fontFamily: "'Segoe UI', sans-serif", background: ui.appBg, overflowX: "hidden", color: ui.bodyText, transition: "background-color 0.3s ease, color 0.3s ease" }}>
+      <div style={{ width: sidebarWidth, background: ui.sidebarBg, boxShadow: ui.shadow, display: "flex", flexDirection: "column", overflow: "hidden", borderTop: isMobile ? `1px solid ${ui.panelBorder}` : "none", transition: "background-color 0.3s ease" }}>
         <div style={{ padding: "16px", background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, color: "#fff", position: "relative" }}>
           <button type="button" onClick={() => navigate("/dashboard")} style={{ border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: 999, padding: "6px 10px", cursor: "pointer", marginBottom: 10 }}>← Back to Home</button>
           
           <button type="button" onClick={handleClearDraft} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", color: "rgba(255,255,255,0.7)", fontSize: 18, cursor: "pointer" }} title="Reset Design & Clear Draft">🔄</button>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            style={{ position: "absolute", top: 16, right: 52, border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 13, fontWeight: 700, borderRadius: 999, padding: "4px 9px", cursor: "pointer" }}
+            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {isDark ? "☀" : "☾"}
+          </button>
 
           <div style={{ fontSize: 17, fontWeight: 800 }}>CoverCraft BD</div>
           <div style={{ fontSize: 9.5, opacity: 0.76 }}>15 Academic Templates (Auto-saving...)</div>
         </div>
-        <div style={{ padding: "13px 14px", borderBottom: "1px solid #eef2f6" }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, color: "#7c8da1", letterSpacing: 1.4, marginBottom: 8 }}>TEMPLATE</div>
+        <div style={{ padding: "13px 14px", borderBottom: `1px solid ${ui.sidebarBorder}` }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, color: ui.mutedText, letterSpacing: 1.4, marginBottom: 8 }}>TEMPLATE</div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(5,1fr)" : "repeat(5,1fr)", gap: 5 }}>
             {templates.map((t) => (
-              <button key={t.id} onClick={() => { setSelectedTemplate(t.id); setStatusMessage(""); }} style={{ padding: "7px 0", borderRadius: 6, border: "none", cursor: "pointer", background: selectedTemplate === t.id ? palette.primary : "#eef2f7", color: selectedTemplate === t.id ? "#fff" : "#64748b", fontSize: 11, fontWeight: 700 }}>T{t.id}</button>
+              <button key={t.id} onClick={() => { setSelectedTemplate(t.id); setStatusMessage(""); }} style={{ padding: "7px 0", borderRadius: 6, border: "none", cursor: "pointer", background: selectedTemplate === t.id ? palette.primary : ui.panelBgSoft, color: selectedTemplate === t.id ? "#fff" : ui.mutedText, fontSize: 11, fontWeight: 700 }}>T{t.id}</button>
             ))}
           </div>
-          <div style={{ fontSize: 10, color: "#64748b", marginTop: 6 }}>
+          <div style={{ fontSize: 10, color: ui.mutedText, marginTop: 6 }}>
             <strong style={{ color: palette.primary }}>{templates.find((x) => x.id === selectedTemplate)?.name}</strong>
             <div>{templates.find((x) => x.id === selectedTemplate)?.desc}</div>
           </div>
         </div>
-        <div style={{ padding: "12px 14px", borderBottom: "1px solid #eef2f6" }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, color: "#7c8da1", letterSpacing: 1.4, marginBottom: 8 }}>COLOR PALETTE</div>
+        <div style={{ padding: "12px 14px", borderBottom: `1px solid ${ui.sidebarBorder}` }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, color: ui.mutedText, letterSpacing: 1.4, marginBottom: 8 }}>COLOR PALETTE</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {palettes.map((x) => (
-              <button key={x.id} onClick={() => { setSelectedPalette(x.id); setStatusMessage(""); }} style={{ width: 27, height: 27, borderRadius: "50%", border: selectedPalette === x.id ? "2px solid #0f172a" : "2px solid transparent", background: `linear-gradient(135deg, ${x.primary}, ${x.secondary})`, cursor: "pointer" }} />
+              <button key={x.id} onClick={() => { setSelectedPalette(x.id); setStatusMessage(""); }} style={{ width: 27, height: 27, borderRadius: "50%", border: selectedPalette === x.id ? `2px solid ${isDark ? "#f8fafc" : "#0f172a"}` : "2px solid transparent", background: `linear-gradient(135deg, ${x.primary}, ${x.secondary})`, cursor: "pointer" }} />
             ))}
           </div>
         </div>
-        <div style={{ display: "flex", borderBottom: "1px solid #eef2f6" }}>
+        <div style={{ display: "flex", borderBottom: `1px solid ${ui.sidebarBorder}` }}>
           {[["university", "University"], ["course", "Course"], ["people", "People"]].map(([id, label]) => (
-            <button key={id} onClick={() => setActiveTab(id)} style={{ flex: 1, padding: "9px 3px", border: "none", cursor: "pointer", background: activeTab === id ? "#fff" : "#f8fafc", color: activeTab === id ? palette.primary : "#7c8da1", fontSize: 10.8, fontWeight: activeTab === id ? 800 : 600 }}>{label}</button>
+            <button key={id} onClick={() => setActiveTab(id)} style={{ flex: 1, padding: "9px 3px", border: "none", cursor: "pointer", background: activeTab === id ? ui.sidebarBg : ui.panelBg, color: activeTab === id ? palette.primary : ui.mutedText, fontSize: 10.8, fontWeight: activeTab === id ? 800 : 600 }}>{label}</button>
           ))}
         </div>
         <div style={{ flex: 1, overflowY: "auto", padding: "13px 14px" }}>
-          {activeTab === "university" && (<><InputField label="UNIVERSITY NAME" field="university" form={form} updateForm={updateForm} /><InputField label="SHORT NAME" field="shortName" form={form} updateForm={updateForm} /><InputField label="DEPARTMENT" field="department" form={form} updateForm={updateForm} /><InputField label="COVER TYPE" field="coverType" form={form} updateForm={updateForm} /></>)}
-          {activeTab === "course" && (<><InputField label="TOPIC NO." field="topicNo" form={form} updateForm={updateForm} /><InputField label="TOPIC NAME" field="topicName" multiline form={form} updateForm={updateForm} /><InputField label="COURSE CODE" field="courseCode" form={form} updateForm={updateForm} /><InputField label="COURSE TITLE" field="courseTitle" form={form} updateForm={updateForm} /><InputField label="SUBMISSION DATE" field="submissionDate" form={form} updateForm={updateForm} /></>)}
+          {activeTab === "university" && (<><InputField label="UNIVERSITY NAME" field="university" form={form} updateForm={updateForm} ui={ui} /><InputField label="SHORT NAME" field="shortName" form={form} updateForm={updateForm} ui={ui} /><InputField label="DEPARTMENT" field="department" form={form} updateForm={updateForm} ui={ui} /><InputField label="COVER TYPE" field="coverType" form={form} updateForm={updateForm} ui={ui} /></>)}
+          {activeTab === "course" && (<><InputField label="TOPIC NO." field="topicNo" form={form} updateForm={updateForm} ui={ui} /><InputField label="TOPIC NAME" field="topicName" multiline form={form} updateForm={updateForm} ui={ui} /><InputField label="COURSE CODE" field="courseCode" form={form} updateForm={updateForm} ui={ui} /><InputField label="COURSE TITLE" field="courseTitle" form={form} updateForm={updateForm} ui={ui} /><InputField label="SUBMISSION DATE" field="submissionDate" form={form} updateForm={updateForm} ui={ui} /></>)}
           {activeTab === "people" && (
             <>
-              <InputField label="TEACHER NAME" field="teacherName" form={form} updateForm={updateForm} />
-              <InputField label="TEACHER DESIGNATION" field="teacherDesignation" form={form} updateForm={updateForm} />
-              <InputField label="TEACHER DEPARTMENT" field="teacherDept" form={form} updateForm={updateForm} />
+              <InputField label="TEACHER NAME" field="teacherName" form={form} updateForm={updateForm} ui={ui} />
+              <InputField label="TEACHER DESIGNATION" field="teacherDesignation" form={form} updateForm={updateForm} ui={ui} />
+              <InputField label="TEACHER DEPARTMENT" field="teacherDept" form={form} updateForm={updateForm} ui={ui} />
               
-              <div style={{ margin: "24px 0 16px", borderBottom: "1px solid #e2e8f0" }} />
+              <div style={{ margin: "24px 0 16px", borderBottom: `1px solid ${ui.panelBorder}` }} />
 
-              <div style={{ display: "flex", background: "#f1f5f9", borderRadius: 8, padding: 4, marginBottom: 16 }}>
-                <button onClick={() => updateForm("submissionMode", "individual")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "individual" ? "#fff" : "transparent", boxShadow: form.submissionMode === "individual" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "individual" ? palette.primary : "#64748b", fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👤 Individual</button>
-                <button onClick={() => updateForm("submissionMode", "group")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "group" ? "#fff" : "transparent", boxShadow: form.submissionMode === "group" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "group" ? palette.primary : "#64748b", fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👥 Group</button>
+              <div style={{ display: "flex", background: ui.panelBgSoft, borderRadius: 8, padding: 4, marginBottom: 16 }}>
+                <button onClick={() => updateForm("submissionMode", "individual")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "individual" ? ui.sidebarBg : "transparent", boxShadow: form.submissionMode === "individual" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "individual" ? palette.primary : ui.mutedText, fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👤 Individual</button>
+                <button onClick={() => updateForm("submissionMode", "group")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "group" ? ui.sidebarBg : "transparent", boxShadow: form.submissionMode === "group" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "group" ? palette.primary : ui.mutedText, fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👥 Group</button>
               </div>
 
               {form.submissionMode === "group" ? (
-                <div style={{ marginBottom: 16, background: "#f8fafc", padding: "12px", borderRadius: 8, border: "1px solid #e2e8f0" }}>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: "#64748b", marginBottom: 10, letterSpacing: 1 }}>GROUP MEMBERS (MAX 5)</div>
+                <div style={{ marginBottom: 16, background: ui.panelBg, padding: "12px", borderRadius: 8, border: `1px solid ${ui.panelBorder}` }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: ui.mutedText, marginBottom: 10, letterSpacing: 1 }}>GROUP MEMBERS (MAX 5)</div>
                   {(form.groupMembers || []).map((m, i) => (
                     <div key={m.id} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
                       <div style={{ flex: 2 }}>
-                        <input type="text" placeholder="Name" value={m.name} onChange={(e) => updateGroupMember(m.id, 'name', e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: 11, boxSizing: "border-box" }} />
+                        <input type="text" placeholder="Name" value={m.name} onChange={(e) => updateGroupMember(m.id, 'name', e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: 6, border: `1px solid ${ui.inputBorder}`, fontSize: 11, boxSizing: "border-box", background: ui.inputBg, color: ui.inputText }} />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <input type="text" placeholder="ID" value={m.studentId} onChange={(e) => updateGroupMember(m.id, 'studentId', e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: 6, border: "1px solid #cbd5e1", fontSize: 11, boxSizing: "border-box" }} />
+                        <input type="text" placeholder="ID" value={m.studentId} onChange={(e) => updateGroupMember(m.id, 'studentId', e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: 6, border: `1px solid ${ui.inputBorder}`, fontSize: 11, boxSizing: "border-box", background: ui.inputBg, color: ui.inputText }} />
                       </div>
                       {(form.groupMembers || []).length > 1 && (
                         <button onClick={() => removeGroupMember(m.id)} style={{ width: 28, height: 32, background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: "bold", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
@@ -1182,40 +1243,40 @@ export default function CoverDesigner() {
                 </div>
               ) : (
                 <>
-                  <InputField label="STUDENT NAME" field="studentName" form={form} updateForm={updateForm} />
-                  <InputField label="STUDENT ID" field="studentId" form={form} updateForm={updateForm} />
+                  <InputField label="STUDENT NAME" field="studentName" form={form} updateForm={updateForm} ui={ui} />
+                  <InputField label="STUDENT ID" field="studentId" form={form} updateForm={updateForm} ui={ui} />
                 </>
               )}
 
-              <InputField label="SECTION" field="section" form={form} updateForm={updateForm} />
-              <InputField label="SEMESTER" field="semester" form={form} updateForm={updateForm} />
+              <InputField label="SECTION" field="section" form={form} updateForm={updateForm} ui={ui} />
+              <InputField label="SEMESTER" field="semester" form={form} updateForm={updateForm} ui={ui} />
             </>
           )}
         </div>
         
-        <div style={{ padding: "12px 14px", borderTop: "1px solid #eef2f6", display: "flex", flexDirection: "column", gap: 8 }}>
-          <button onClick={handleShareLink} disabled={isSaving} style={{ width: "100%", padding: 10, borderRadius: 7, border: `2px dashed ${palette.primary}`, background: "#f8fafc", color: palette.primary, fontWeight: 800, cursor: isSaving ? "not-allowed" : "pointer" }}>
+        <div style={{ padding: "12px 14px", borderTop: `1px solid ${ui.sidebarBorder}`, display: "flex", flexDirection: "column", gap: 8 }}>
+          <button onClick={handleShareLink} disabled={isSaving} style={{ width: "100%", padding: 10, borderRadius: 7, border: `2px dashed ${palette.primary}`, background: ui.panelBg, color: palette.primary, fontWeight: 800, cursor: isSaving ? "not-allowed" : "pointer" }}>
             {isSaving ? "Wait..." : "🔗 Copy Share Link"}
           </button>
           
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={handleDownloadPdf} disabled={isSaving} style={{ flex: 1, padding: 10, borderRadius: 7, border: "none", background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, color: "#fff", fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>Download PDF</button>
-            <button onClick={handleDownloadPng} disabled={isSaving} style={{ flex: 1, padding: 10, borderRadius: 7, border: `2px solid ${palette.primary}`, background: "#fff", color: palette.primary, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>Save PNG</button>
+            <button onClick={handleDownloadPng} disabled={isSaving} style={{ flex: 1, padding: 10, borderRadius: 7, border: `2px solid ${palette.primary}`, background: ui.sidebarBg, color: palette.primary, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>Save PNG</button>
           </div>
 
-          <div style={{ marginTop: 6, padding: 12, background: "#f8fafc", borderRadius: 8, border: "1px dashed #cbd5e1" }}>
-            <div style={{ fontSize: 10, fontWeight: 800, color: "#64748b", marginBottom: 8, letterSpacing: 1.5 }}>CR SPECIAL (BATCH MODE)</div>
+          <div style={{ marginTop: 6, padding: 12, background: ui.panelBg, borderRadius: 8, border: `1px dashed ${ui.inputBorder}` }}>
+            <div style={{ fontSize: 10, fontWeight: 800, color: ui.mutedText, marginBottom: 8, letterSpacing: 1.5 }}>CR SPECIAL (BATCH MODE)</div>
             
             {batchStudents.length === 0 ? (
               <button onClick={() => {
                 if (csvInputRef.current) csvInputRef.current.value = ""; 
                 csvInputRef.current?.click();
-              }} disabled={isSaving} style={{ width: "100%", padding: 10, borderRadius: 6, border: "1px solid #0f172a", background: "#fff", color: "#0f172a", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>
+              }} disabled={isSaving} style={{ width: "100%", padding: 10, borderRadius: 6, border: `1px solid ${ui.inputBorder}`, background: ui.sidebarBg, color: ui.bodyText, fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>
                 📁 1. Upload CSV File
               </button>
             ) : (
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setBatchStudents([])} disabled={isSaving} style={{ width: "30%", padding: 10, borderRadius: 6, border: "1px solid #ef4444", background: "#fff", color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>
+                <button onClick={() => setBatchStudents([])} disabled={isSaving} style={{ width: "30%", padding: 10, borderRadius: 6, border: "1px solid #ef4444", background: ui.sidebarBg, color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>
                   Cancel
                 </button>
                 <button onClick={handleBatchDownload} disabled={isSaving} style={{ width: "70%", padding: 10, borderRadius: 6, border: "none", background: "#0f172a", color: "#fff", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer", boxShadow: "0 4px 6px rgba(15, 23, 42, 0.2)" }}>
@@ -1229,11 +1290,11 @@ export default function CoverDesigner() {
           </div>
         </div>
         
-        {statusMessage && <div style={{ padding: "8px 14px 12px", fontSize: 11, color: statusMessage.includes("❌") ? "#ef4444" : "#0f172a", fontWeight: "bold", borderTop: "1px solid #f5f5f5", textAlign: "center" }}>{statusMessage}</div>}
+        {statusMessage && <div style={{ padding: "8px 14px 12px", fontSize: 11, color: statusMessage.includes("❌") ? "#ef4444" : ui.bodyText, fontWeight: "bold", borderTop: `1px solid ${ui.sidebarBorder}`, textAlign: "center", background: ui.statusBg }}>{statusMessage}</div>}
       </div>
 
       <div style={{ flex: 1, minWidth: 0, overflow: "auto", padding: isMobile ? "14px 8px 12px" : "22px 28px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ marginBottom: 14, fontSize: 10.5, color: "#9aa7b7", letterSpacing: 2, fontWeight: 700 }}>LIVE PREVIEW - A4 FORMAT</div>
+        <div style={{ marginBottom: 14, fontSize: 10.5, color: ui.previewCaption, letterSpacing: 2, fontWeight: 700 }}>LIVE PREVIEW - A4 FORMAT</div>
         <div style={{ transform: `scale(${previewScale})`, transformOrigin: "top center", boxShadow: "0 24px 70px rgba(0,0,0,0.16)", marginBottom: isMobile ? 14 : -320, transition: "transform 0.15s ease" }}>
           <CoverPage form={form} palette={palette} theme={theme} />
         </div>

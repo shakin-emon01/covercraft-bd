@@ -38,6 +38,11 @@ import {
   createSupportTicket,
   updateSupportTicket,
 } from '../controllers/admin.controller';
+import {
+  createAdminReview,
+  getAdminReviews,
+  updateAdminReview,
+} from '../controllers/review.admin.controller';
 import { authenticate, requireAdmin, requirePermission } from '../middleware/auth.middleware';
 
 const router = Router();
@@ -72,6 +77,9 @@ router.post('/logo-requests/bulk-resolve', requirePermission('logos.review'), re
 
 router.get('/analytics/templates', requirePermission('analytics.view'), getTemplateAnalytics);
 router.get('/analytics/templates/performance', requirePermission('analytics.view'), getTemplatePerformanceAnalytics);
+router.get('/reviews', getAdminReviews);
+router.post('/reviews', createAdminReview);
+router.patch('/reviews/:id', updateAdminReview);
 
 router.post('/broadcast', requirePermission('broadcast.manage'), updateBroadcast);
 

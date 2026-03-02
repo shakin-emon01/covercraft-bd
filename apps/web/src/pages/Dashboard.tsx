@@ -1,471 +1,592 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuthStore } from "../store/authStore";
-import API, { deleteCover, getActiveBroadcast } from "../api/auth";
-import { useViewport } from "../hooks/useViewport";
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { createReview, deleteCover, getActiveBroadcast, getReviews } from '../api/auth';
+import API from '../api/auth';
+import { useAuthStore } from '../store/authStore';
+import { useThemeMode } from '../hooks/useThemeMode';
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
+  transition: { duration: 0.55, ease: 'easeOut' },
+  viewport: { once: true, amount: 0.2 },
+};
+
+const interactionClass = 'transition-all duration-300 hover:scale-105 hover:shadow-lg';
+
+const StarRating = ({ value, onChange, disabled = false }: { value: number; onChange: (val: number) => void; disabled?: boolean }) => {
+  return (
+    <div className="flex items-center gap-2">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button
+          key={star}
+          type="button"
+          disabled={disabled}
+          onClick={() => onChange(star)}
+          className={`${interactionClass} h-10 w-10 rounded-full border text-xl ${
+            star <= value
+              ? 'border-amber-300 bg-amber-100 text-amber-500 dark:border-amber-500/50 dark:bg-amber-500/10 dark:text-amber-300'
+              : 'border-slate-200 bg-white text-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-500'
+          }`}
+          aria-label={`Give ${star} star`}
+        >
+          ★
+        </button>
+      ))}
+    </div>
+  );
+};
+
+const ratingLabel = (rating: number) => {
+  if (rating >= 5) return 'Outstanding';
+  if (rating >= 4) return 'Excellent';
+  if (rating >= 3) return 'Good';
+  if (rating >= 2) return 'Fair';
+  return 'Needs Work';
+};
+
+const starsFromRating = (rating: number) => '★'.repeat(Math.max(0, Math.min(5, Number(rating) || 0)));
+
+const getReviewDisplayName = (review: any) => {
+  return review?.displayName || review?.user?.name || 'CoverCraft User';
+};
 
 export default function Dashboard() {
   const { user, token, logout } = useAuthStore();
   const navigate = useNavigate();
-  const { isMobile, isTablet } = useViewport();
-  const [profile, setProfile] = useState(null);
-  const [covers, setCovers] = useState([]);
+  const { isDark, toggleTheme } = useThemeMode();
+
+  const [profile, setProfile] = useState<any>(null);
+  const [covers, setCovers] = useState<any[]>([]);
   const [coversLoading, setCoversLoading] = useState(true);
-  const [deletingCoverId, setDeletingCoverId] = useState("");
-  const [broadcast, setBroadcast] = useState(null);
-  const [loadError, setLoadError] = useState("");
-  const [recentViewMode, setRecentViewMode] = useState("default");
-  const [savedViewMode, setSavedViewMode] = useState("cards");
-  const [mobileProfileOpen, setMobileProfileOpen] = useState(false);
+  const [deletingCoverId, setDeletingCoverId] = useState('');
+  const [broadcast, setBroadcast] = useState<any>(null);
+  const [loadError, setLoadError] = useState('');
+
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSuccess, setReviewSuccess] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [activeCarouselIndex, setActiveCarouselIndex] = useState(0);
+
+  const loadReviews = async () => {
+    setReviewsLoading(true);
+    try {
+      const { data } = await getReviews({ view: 'carousel', sort: 'top', take: 10 });
+      setReviews(Array.isArray(data) ? data : []);
+    } catch {
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!user || !token) {
       logout();
-      navigate("/login");
+      navigate('/login');
       return;
     }
 
     let cancelled = false;
-    const loadDashboardData = async () => {
-      setLoadError("");
-      setCoversLoading(true);
 
-      const [profileRes, coversRes, broadcastRes] = await Promise.allSettled([
-        API.get("/profile"),
-        API.get("/covers"),
+    const loadDashboardData = async () => {
+      setLoadError('');
+      setCoversLoading(true);
+      setReviewsLoading(true);
+
+      const [profileRes, coversRes, broadcastRes, reviewsRes] = await Promise.allSettled([
+        API.get('/profile'),
+        API.get('/covers'),
         getActiveBroadcast(),
+        getReviews({ view: 'carousel', sort: 'top', take: 10 }),
       ]);
 
       if (cancelled) return;
 
-      if (profileRes.status === "fulfilled") {
-        setProfile(profileRes.value.data);
-      } else {
-        setProfile(null);
-      }
+      if (profileRes.status === 'fulfilled') setProfile(profileRes.value.data);
+      else setProfile(null);
 
-      if (coversRes.status === "fulfilled") {
-        setCovers(coversRes.value.data || []);
-      } else {
+      if (coversRes.status === 'fulfilled') setCovers(coversRes.value.data || []);
+      else {
         setCovers([]);
-        setLoadError("Could not load dashboard data. Please ensure backend server is running on port 5000.");
+        setLoadError('Could not load dashboard data. Please ensure backend server is running on port 5000.');
       }
 
-      if (broadcastRes.status === "fulfilled") {
-        setBroadcast(broadcastRes.value.data);
-      } else {
-        setBroadcast(null);
-      }
+      if (broadcastRes.status === 'fulfilled') setBroadcast(broadcastRes.value.data);
+      else setBroadcast(null);
+
+      if (reviewsRes.status === 'fulfilled') setReviews(Array.isArray(reviewsRes.value.data) ? reviewsRes.value.data : []);
+      else setReviews([]);
 
       setCoversLoading(false);
+      setReviewsLoading(false);
     };
 
-    loadDashboardData();
+    void loadDashboardData();
+
     return () => {
       cancelled = true;
     };
   }, [user, token, logout, navigate]);
 
   useEffect(() => {
-    if (isMobile) {
-      setRecentViewMode("list");
-      setSavedViewMode("list");
+    if (!reviews.length) {
+      setActiveCarouselIndex(0);
       return;
     }
-    setRecentViewMode("default");
-    setSavedViewMode("cards");
-    setMobileProfileOpen(false);
-  }, [isMobile]);
+    if (activeCarouselIndex >= reviews.length) {
+      setActiveCarouselIndex(0);
+    }
+  }, [reviews.length, activeCarouselIndex]);
 
-  const handleLogout = () => { logout(); navigate("/login"); };
+  useEffect(() => {
+    if (reviews.length <= 1) return;
+    const intervalId = window.setInterval(() => {
+      setActiveCarouselIndex((prev) => (prev + 1) % reviews.length);
+    }, 4200);
+    return () => window.clearInterval(intervalId);
+  }, [reviews.length]);
 
-  const handleDuplicate = (cover) => {
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const handleDuplicate = (cover: any) => {
     const coverForm = cover?.coverData || {};
     localStorage.setItem(
-      "covercraft_draft",
+      'covercraft_draft',
       JSON.stringify({
         form: coverForm,
         selectedTemplate: Number(cover?.templateId) || 1,
-        selectedPalette: cover?.paletteId || "blue",
+        selectedPalette: cover?.paletteId || 'blue',
       })
     );
-    navigate("/create");
+    navigate('/create');
   };
 
-  const handleDeleteCover = async (coverId) => {
-    if (!window.confirm("Are you sure you want to delete this saved cover?")) return;
+  const handleDeleteCover = async (coverId: string) => {
+    if (!window.confirm('Are you sure you want to delete this saved cover?')) return;
+
     setDeletingCoverId(coverId);
     try {
       await deleteCover(coverId);
       setCovers((prev) => prev.filter((cover) => cover.id !== coverId));
-    } catch (error) {
-      alert(error?.response?.data?.message || "Failed to delete cover.");
+    } catch (error: any) {
+      alert(error?.response?.data?.message || 'Failed to delete cover.');
     } finally {
-      setDeletingCoverId("");
+      setDeletingCoverId('');
     }
   };
 
-  const stats = [
-    { label:"Covers Created", value: covers.length || 0, icon:"📄", color:"#2563eb" },
-    { label:"Templates Used", value: new Set(covers.map(c=>c.templateId)).size || 0, icon:"🎨", color:"#0d9488" },
-    { label:"University", value: profile?.university?.shortName || "—", icon:"🏛️", color:"#7c3aed" },
-    { label:"Semester", value: profile?.semester || "—", icon:"📅", color:"#b91c1c" },
-  ];
+  const handleReviewSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setReviewError('');
+    setReviewSuccess('');
 
-  const getExpiryDate = (cover) => {
+    const sanitized = reviewComment.trim();
+    if (!sanitized) {
+      setReviewError('Please write a short comment before submitting.');
+      return;
+    }
+
+    setReviewSubmitting(true);
+    try {
+      await createReview({ rating: reviewRating, comment: sanitized });
+      setReviewSuccess('Thanks! Your review was submitted.');
+      setReviewComment('');
+      setReviewRating(5);
+      await loadReviews();
+    } catch (error: any) {
+      setReviewError(error?.response?.data?.message || 'Failed to submit review. Please try again.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const getExpiryDate = (cover: any) => {
     if (cover?.expiresAt) return new Date(cover.expiresAt);
     const createdAt = new Date(cover.createdAt);
     return new Date(createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
   };
 
   const previewCovers = covers.slice(0, 6);
-  const recentCovers = covers.slice(0, 5);
+  const currentCarouselReview = reviews[activeCarouselIndex] || null;
+  const previousCarouselReview = reviews[(activeCarouselIndex - 1 + reviews.length) % reviews.length] || null;
+  const nextCarouselReview = reviews[(activeCarouselIndex + 1) % reviews.length] || null;
+
+  const averageRating = useMemo(() => {
+    if (!reviews.length) return 'N/A';
+    const total = reviews.reduce((sum, item) => sum + Number(item.rating || 0), 0);
+    return (total / reviews.length).toFixed(1);
+  }, [reviews]);
+
+  const stats = [
+    { label: 'Covers Created', value: covers.length || 0, icon: '📄' },
+    { label: 'Templates Used', value: new Set(covers.map((cover) => cover.templateId)).size || 0, icon: '🎨' },
+    { label: 'Top 10 Rating', value: averageRating, icon: '⭐' },
+    { label: 'University', value: profile?.university?.shortName || '—', icon: '🏛️' },
+  ];
 
   return (
-    <div style={{ minHeight:"100vh", background:"#f1f5f9", fontFamily:"'Segoe UI',sans-serif" }}>
-      {/* Navbar */}
-      <nav style={{ background:"#fff", borderBottom:"1px solid #e2e8f0", padding:isMobile?"10px 14px":"0 32px", minHeight:64, display:"flex", flexDirection:isMobile?"column":"row", alignItems:isMobile?"stretch":"center", justifyContent:"space-between", gap:isMobile?10:0, position:"sticky", top:0, zIndex:140, boxShadow:"0 1px 4px rgba(0,0,0,0.04)" }}>
-        <div style={{ display:"flex", alignItems:"center", gap:10 }}>
-          <span style={{ fontSize:22 }}>📄</span>
-          <span style={{ fontSize:16, fontWeight:900, color:"#1a3a6b" }}>CoverCraft BD</span>
-        </div>
-        <div style={{ display:"flex", alignItems:"center", justifyContent:isMobile?"space-between":"flex-end", flexWrap:"wrap", gap:isMobile?8:20 }}>
-          <Link to="/create" style={{ textDecoration:"none", background:"linear-gradient(135deg,#1a3a6b,#2563eb)", color:"#fff", padding:"8px 18px", borderRadius:8, fontSize:13, fontWeight:700 }}>+ New Cover</Link>
-          <div style={{ position: "relative", display:"flex", alignItems:"center", gap:10 }}>
-            <button
-              type="button"
-              onClick={() => {
-                if (isMobile) setMobileProfileOpen((prev) => !prev);
-              }}
-              style={{ width:36, height:36, borderRadius:"50%", background:"linear-gradient(135deg,#1a3a6b,#2563eb)", display:"flex", alignItems:"center", justifyContent:"center", color:"#fff", fontSize:14, fontWeight:700, border:"none", cursor:isMobile?"pointer":"default" }}
-              aria-label="Open mobile profile menu"
-            >
-              {user?.name?.charAt(0)?.toUpperCase()}
-            </button>
-            <div style={{ display:isMobile?"none":"block" }}>
-              <div style={{ fontSize:13, fontWeight:700, color:"#1e293b" }}>{user?.name}</div>
-              <div style={{ fontSize:10.5, color:"#94a3b8" }}>{user?.role}</div>
+    <div className="min-h-screen bg-slate-100 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
+      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
+        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" alt="CoverCraft BD logo" className="h-11 w-11 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-slate-700" />
+            <div>
+              <div className="text-lg font-black leading-tight tracking-tight">CoverCraft BD</div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Academic Cover Generator</p>
             </div>
           </div>
-          <button onClick={handleLogout} style={{ background:"none", border:"1px solid #e2e8f0", borderRadius:7, padding:"6px 14px", fontSize:12, color:"#64748b", cursor:"pointer", fontWeight:600 }}>Sign Out</button>
+
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className={`${interactionClass} rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200`}
+            >
+              {isDark ? '☀️ Light' : '🌙 Dark'}
+            </button>
+
+            <Link
+              to="/reviews"
+              className={`${interactionClass} rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm font-semibold text-indigo-700 dark:border-indigo-400/40 dark:bg-indigo-500/10 dark:text-indigo-200`}
+            >
+              All Reviews
+            </Link>
+
+            <Link
+              to="/create"
+              className={`${interactionClass} rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 px-3 py-2 text-sm font-bold text-white`}
+            >
+              + New Cover
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className={`${interactionClass} rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 dark:border-rose-400/40 dark:bg-rose-500/10 dark:text-rose-200`}
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </nav>
 
-      <div style={{ maxWidth:1100, margin:"0 auto", padding:isMobile?"16px 12px 24px":isTablet?"24px 16px":"32px 24px" }}>
+      <main className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         {loadError && (
-          <div style={{ background:"#fef2f2", border:"1px solid #fecaca", borderRadius:8, padding:"10px 14px", marginBottom:16, color:"#dc2626", fontSize:13, fontWeight:700 }}>
+          <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 dark:border-rose-400/40 dark:bg-rose-500/10 dark:text-rose-200">
             {loadError}
           </div>
         )}
 
-        {isMobile && mobileProfileOpen && (
-          <div style={{ background:"#fff", borderRadius:14, padding:"14px 12px", marginBottom:16, boxShadow:"0 1px 4px rgba(0,0,0,0.05)", border:"1px solid #e2e8f0" }}>
-            <h3 style={{ fontSize:14, fontWeight:800, color:"#1e293b", margin:"0 0 12px" }}>Your Profile</h3>
-            {profile ? (
-              <>
-                <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:12, paddingBottom:10, borderBottom:"1px solid #f1f5f9" }}>
-                  <img src={profile.university?.logoUrl} alt="" style={{ width:40, height:40, objectFit:"contain", borderRadius:8, background:"#f8fafc", padding:4 }} onError={e => {e.target.style.display="none";}}/>
-                  <div>
-                    <div style={{ fontSize:12.5, fontWeight:700, color:"#1e293b" }}>{profile.university?.shortName || "University"}</div>
-                    <div style={{ fontSize:11, color:"#94a3b8" }}>{profile.university?.type || "Student"}</div>
-                  </div>
-                </div>
-                {[{ label:"Student ID", value:profile.studentId }, { label:"Department", value:profile.department }, { label:"Semester", value:profile.semester }].map((item, idx) => (
-                  <div key={idx} style={{ display:"flex", justifyContent:"space-between", gap:12, marginBottom:6 }}>
-                    <span style={{ fontSize:11.5, color:"#94a3b8" }}>{item.label}</span>
-                    <span style={{ fontSize:11.5, fontWeight:700, color:"#1e293b", textAlign:"right" }}>{item.value || "—"}</span>
-                  </div>
-                ))}
+        {broadcast?.isActive && (
+          <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">
+            📢 {broadcast.message}
+          </div>
+        )}
+
+        <motion.section
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.whileInView}
+          transition={fadeInUp.transition}
+          viewport={fadeInUp.viewport}
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-blue-600 px-5 py-8 text-white shadow-xl sm:px-8"
+        >
+          <div className="absolute -right-20 -top-20 h-52 w-52 rounded-full bg-white/10" />
+          <div className="absolute -bottom-24 -left-14 h-64 w-64 rounded-full bg-cyan-300/15" />
+
+          <div className="relative z-10 grid gap-8 md:grid-cols-[1.35fr_1fr] md:items-center">
+            <div>
+              <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-blue-100/80">Welcome Back</p>
+              <h1 className="text-3xl font-black leading-tight sm:text-4xl">
+                {user?.name ? `${user.name}, ready for your next submission?` : 'Ready for your next submission?'}
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm text-blue-100/85 sm:text-base">
+                Build premium looking university cover pages in minutes. Scroll down to explore your saved work, feedback, and quick actions.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-3">
                 <button
-                  onClick={() => { setMobileProfileOpen(false); navigate("/profile/setup"); }}
-                  style={{ width:"100%", marginTop:10, padding:"8px", borderRadius:7, border:"1px solid #e2e8f0", background:"#fff", fontSize:12, fontWeight:700, color:"#64748b", cursor:"pointer" }}
+                  onClick={() => navigate('/create')}
+                  className={`${interactionClass} rounded-xl bg-white px-4 py-2 text-sm font-bold text-blue-800`}
                 >
-                  ✏️ Edit Profile
+                  Start Designing
                 </button>
-              </>
-            ) : (
-              <div style={{ textAlign:"center" }}>
-                <div style={{ fontSize:12.5, color:"#64748b", marginBottom:10 }}>Profile not set up yet</div>
+
                 <button
-                  onClick={() => { setMobileProfileOpen(false); navigate("/profile/setup"); }}
-                  style={{ width:"100%", border:"none", background:"linear-gradient(135deg,#1a3a6b,#2563eb)", color:"#fff", borderRadius:8, padding:"9px 12px", fontSize:12.5, fontWeight:700, cursor:"pointer" }}
+                  onClick={() => navigate('/profile/setup')}
+                  className={`${interactionClass} rounded-xl border border-white/35 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur`}
                 >
-                  Setup Profile
+                  Edit Profile
                 </button>
               </div>
-            )}
-          </div>
-        )}
-
-        {broadcast?.isActive && (
-          <div
-            style={{
-              background: broadcast.type === "warning" ? "#fef08a" : broadcast.type === "success" ? "#bbf7d0" : "#bfdbfe",
-              color: broadcast.type === "warning" ? "#854d0e" : broadcast.type === "success" ? "#166534" : "#1e40af",
-              padding: "12px 20px",
-              borderRadius: 8,
-              marginBottom: 24,
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-              fontWeight: 700,
-              border: "1px solid rgba(0,0,0,0.05)",
-            }}
-          >
-            <span style={{ fontSize: 18 }}>{broadcast.type === "warning" ? "🔥" : broadcast.type === "success" ? "🎉" : "📢"}</span>
-            {broadcast.message}
-          </div>
-        )}
-
-        {/* Welcome banner */}
-        <div style={{ background:"linear-gradient(135deg,#1a3a6b 0%,#2563eb 60%,#60a5fa 100%)", borderRadius:16, padding:isMobile?"20px 16px":"28px 32px", marginBottom:28, position:"relative", overflow:"hidden" }}>
-          <div style={{ position:"absolute", top:-60, right:-60, width:240, height:240, borderRadius:"50%", background:"rgba(255,255,255,0.06)" }}/>
-          <div style={{ position:"absolute", bottom:-40, right:100, width:160, height:160, borderRadius:"50%", background:"rgba(255,255,255,0.04)" }}/>
-          <div style={{ position:"relative", zIndex:1 }}>
-            <div style={{ fontSize:13, color:"rgba(255,255,255,0.65)", marginBottom:6 }}>Welcome back,</div>
-            <h1 style={{ fontSize:isMobile?22:26, fontWeight:900, color:"#fff", margin:"0 0 8px" }}>{user?.name} 👋</h1>
-            <p style={{ fontSize:13.5, color:"rgba(255,255,255,0.7)", margin:"0 0 18px" }}>
-              {profile ? `${profile.university?.name} · ${profile.department}` : "Complete your profile to get started"}
-            </p>
-            <div style={{ display:"flex", flexDirection:isMobile?"column":"row", gap:10 }}>
-              <button onClick={() => navigate("/create")} style={{ background:"#fff", color:"#1a3a6b", border:"none", padding:"10px 22px", borderRadius:8, fontSize:13, fontWeight:800, cursor:"pointer" }}>
-                🎨 Create Cover Page
-              </button>
-              {!profile && (
-                <button onClick={() => navigate("/profile/setup")} style={{ background:"rgba(255,255,255,0.15)", color:"#fff", border:"1px solid rgba(255,255,255,0.3)", padding:"10px 22px", borderRadius:8, fontSize:13, fontWeight:600, cursor:"pointer" }}>
-                  👤 Setup Profile
-                </button>
-              )}
             </div>
-          </div>
-        </div>
 
-        {/* Stats */}
-        <div style={{ display:"grid", gridTemplateColumns:isMobile?"1fr 1fr":isTablet?"repeat(2,1fr)":"repeat(4,1fr)", gap:16, marginBottom:28 }}>
-          {stats.map((s,i) => (
-            <div key={i} style={{ background:"#fff", borderRadius:12, padding:"20px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)", borderTop:`3px solid ${s.color}` }}>
-              <div style={{ fontSize:24, marginBottom:8 }}>{s.icon}</div>
-              <div style={{ fontSize:22, fontWeight:900, color:"#1e293b", marginBottom:2 }}>{s.value}</div>
-              <div style={{ fontSize:12, color:"#94a3b8", fontWeight:600 }}>{s.label}</div>
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+              viewport={{ once: true, amount: 0.25 }}
+              className="mx-auto flex w-full max-w-xs items-center justify-center rounded-3xl border border-white/20 bg-white/10 p-5 backdrop-blur"
+            >
+              <img src="/logo.png" alt="CoverCraft BD visual" className="w-full rounded-2xl object-contain" />
+            </motion.div>
+          </div>
+        </motion.section>
+
+        <motion.section
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.whileInView}
+          transition={fadeInUp.transition}
+          viewport={fadeInUp.viewport}
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        >
+          {stats.map((item) => (
+            <div
+              key={item.label}
+              className={`${interactionClass} rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900`}
+            >
+              <div className="mb-3 text-2xl">{item.icon}</div>
+              <div className="text-2xl font-black text-slate-900 dark:text-slate-100">{item.value}</div>
+              <div className="mt-1 text-sm font-semibold text-slate-500 dark:text-slate-400">{item.label}</div>
             </div>
           ))}
-        </div>
+        </motion.section>
 
-        <div style={{ display:"grid", gridTemplateColumns:isTablet || isMobile ? "1fr" : "2fr 1fr", gap:20 }}>
-          {/* Recent covers */}
-          <div style={{ background:"#fff", borderRadius:14, padding:isMobile ? "18px 14px" : "24px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:10, marginBottom:20, flexWrap:"wrap" }}>
-              <h2 style={{ fontSize:16, fontWeight:800, color:"#1e293b", margin:0 }}>Recent Covers</h2>
-              <div style={{ display:"flex", alignItems:"center", gap:8, marginLeft:"auto" }}>
-                <div style={{ display:"flex", background:"#f1f5f9", borderRadius:8, padding:3 }}>
-                  <button
-                    onClick={() => setRecentViewMode("default")}
-                    style={{ border:"none", background: recentViewMode === "default" ? "#fff" : "transparent", color: recentViewMode === "default" ? "#1e293b" : "#64748b", fontSize:11.5, fontWeight:700, borderRadius:6, padding:"6px 10px", cursor:"pointer" }}
-                  >
-                    Default
-                  </button>
-                  <button
-                    onClick={() => setRecentViewMode("list")}
-                    style={{ border:"none", background: recentViewMode === "list" ? "#fff" : "transparent", color: recentViewMode === "list" ? "#1e293b" : "#64748b", fontSize:11.5, fontWeight:700, borderRadius:6, padding:"6px 10px", cursor:"pointer" }}
-                  >
-                    List
-                  </button>
-                </div>
-                <button onClick={() => navigate("/create")} style={{ background:"#f0f5ff", color:"#2563eb", border:"none", padding:"7px 14px", borderRadius:7, fontSize:12, fontWeight:700, cursor:"pointer" }}>+ New</button>
-              </div>
+        <motion.section
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.whileInView}
+          transition={fadeInUp.transition}
+          viewport={fadeInUp.viewport}
+          className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6"
+        >
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xl font-black tracking-tight">Recent Covers</h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Your latest generated files with quick actions.</p>
             </div>
-            {covers.length === 0 ? (
-              <div style={{ textAlign:"center", padding:"40px 20px" }}>
-                <div style={{ fontSize:40, marginBottom:12 }}>📋</div>
-                <div style={{ fontSize:14, fontWeight:700, color:"#1e293b", marginBottom:6 }}>No covers yet</div>
-                <div style={{ fontSize:13, color:"#94a3b8", marginBottom:18 }}>Create your first academic cover page</div>
-                <button onClick={() => navigate("/create")} style={{ background:"linear-gradient(135deg,#1a3a6b,#2563eb)", color:"#fff", border:"none", padding:"10px 22px", borderRadius:8, fontSize:13, fontWeight:700, cursor:"pointer" }}>
-                  Get Started
-                </button>
-              </div>
-            ) : recentViewMode === "default" ? (
-              recentCovers.map((cover) => (
-                <div key={cover.id} style={{ display:"flex", alignItems:isMobile?"flex-start":"center", flexDirection:isMobile?"column":"row", gap:14, padding:"12px 0", borderBottom:"1px solid #f1f5f9" }}>
-                  <div style={{ width:40, height:48, background:"#f0f5ff", borderRadius:6, display:"flex", alignItems:"center", justifyContent:"center", fontSize:18, flexShrink:0 }}>📄</div>
-                  <div style={{ flex:1 }}>
-                    <div style={{ fontSize:13.5, fontWeight:700, color:"#1e293b" }}>{cover.coverData?.courseCode || "Cover Page"}</div>
-                    <div style={{ fontSize:11.5, color:"#94a3b8" }}>{cover.coverData?.courseTitle} · Template {cover.templateId}</div>
-                  </div>
-                  <div style={{ fontSize:11, color:"#cbd5e1", alignSelf:isMobile?"flex-start":"auto" }}>{new Date(cover.createdAt).toLocaleDateString()}</div>
-                </div>
-              ))
-            ) : (
-              <div style={{ display:"flex", flexDirection:"column", gap:2 }}>
-                {recentCovers.map((cover) => (
-                  <div key={cover.id} style={{ padding:"10px 0", borderBottom:"1px solid #f1f5f9" }}>
-                    <div style={{ fontSize:14, fontWeight:800, color:"#1e293b" }}>{cover.coverData?.courseCode || "Cover Page"}</div>
-                    <div style={{ fontSize:12, color:"#64748b", marginTop:3, lineHeight:1.4 }}>{cover.coverData?.courseTitle || cover.coverData?.topicName || "Untitled Assignment"}</div>
-                    <div style={{ fontSize:11.5, color:"#94a3b8", marginTop:6 }}>{new Date(cover.createdAt).toLocaleDateString()} · Template {cover.templateId}</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {!isMobile && (
-            <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
-              <div style={{ background:"#fff", borderRadius:14, padding:"22px", boxShadow:"0 1px 4px rgba(0,0,0,0.05)" }}>
-                <h3 style={{ fontSize:14, fontWeight:800, color:"#1e293b", margin:"0 0 16px" }}>Your Profile</h3>
-                {profile ? (
-                  <div>
-                    <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:16, paddingBottom:14, borderBottom:"1px solid #f1f5f9" }}>
-                      <img src={profile.university?.logoUrl} alt="" style={{ width:48, height:48, objectFit:"contain", borderRadius:8, background:"#f8fafc", padding:4 }} onError={e => {e.target.style.display="none"}}/>
-                      <div>
-                        <div style={{ fontSize:12.5, fontWeight:700, color:"#1e293b" }}>{profile.university?.shortName}</div>
-                        <div style={{ fontSize:11, color:"#94a3b8" }}>{profile.university?.type}</div>
-                      </div>
-                    </div>
-                    {[
-                      { label:"Student ID", value:profile.studentId },
-                      { label:"Department", value:profile.department },
-                      { label:"Semester", value:profile.semester },
-                    ].map((item,i) => (
-                      <div key={i} style={{ display:"flex", justifyContent:"space-between", marginBottom:8 }}>
-                        <span style={{ fontSize:11.5, color:"#94a3b8" }}>{item.label}</span>
-                        <span style={{ fontSize:11.5, fontWeight:700, color:"#1e293b" }}>{item.value || "—"}</span>
-                      </div>
-                    ))}
-                    <button onClick={() => navigate("/profile/setup")} style={{ width:"100%", marginTop:10, padding:"8px", borderRadius:7, border:"1px solid #e2e8f0", background:"#fff", fontSize:12, fontWeight:600, color:"#64748b", cursor:"pointer" }}>
-                      ✏️ Edit Profile
-                    </button>
-                  </div>
-                ) : (
-                  <div style={{ textAlign:"center", padding:"20px 0" }}>
-                    <div style={{ fontSize:28, marginBottom:10 }}>👤</div>
-                    <div style={{ fontSize:13, color:"#64748b", marginBottom:14 }}>Profile not set up yet</div>
-                    <button onClick={() => navigate("/profile/setup")} style={{ background:"linear-gradient(135deg,#1a3a6b,#2563eb)", color:"#fff", border:"none", padding:"9px 18px", borderRadius:8, fontSize:12.5, fontWeight:700, cursor:"pointer" }}>
-                      Setup Profile
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              <div style={{ background:"linear-gradient(135deg,#134e4a,#0d9488)", borderRadius:14, padding:"22px", color:"#fff" }}>
-                <div style={{ fontSize:20, marginBottom:10 }}>🚀</div>
-                <div style={{ fontSize:14, fontWeight:800, marginBottom:6 }}>Ready to create?</div>
-                <div style={{ fontSize:12, opacity:0.75, marginBottom:14, lineHeight:1.6 }}>Pick from multiple templates and generate your cover page in seconds.</div>
-                <button onClick={() => navigate("/create")} style={{ background:"rgba(255,255,255,0.2)", border:"1px solid rgba(255,255,255,0.3)", color:"#fff", padding:"9px 18px", borderRadius:8, fontSize:12.5, fontWeight:700, cursor:"pointer", width:"100%" }}>
-                  Start Creating →
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div style={{ marginTop: 26, background: "#fff", borderRadius: 14, padding: isMobile ? "18px 14px" : "24px", boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 18, borderBottom: "2px solid #e2e8f0", paddingBottom: 10 }}>
-            <h2 style={{ fontSize: 18, color: "#64748b", margin: 0 }}>
-              ☁️ My Saved Covers ({covers.length})
-            </h2>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto" }}>
-              <div style={{ display:"flex", background:"#f1f5f9", borderRadius:8, padding:3 }}>
-                <button
-                  onClick={() => setSavedViewMode("cards")}
-                  style={{ border:"none", background: savedViewMode === "cards" ? "#fff" : "transparent", color: savedViewMode === "cards" ? "#1e293b" : "#64748b", fontSize:11.5, fontWeight:700, borderRadius:6, padding:"6px 10px", cursor:"pointer" }}
-                >
-                  Default
-                </button>
-                <button
-                  onClick={() => setSavedViewMode("list")}
-                  style={{ border:"none", background: savedViewMode === "list" ? "#fff" : "transparent", color: savedViewMode === "list" ? "#1e293b" : "#64748b", fontSize:11.5, fontWeight:700, borderRadius:6, padding:"6px 10px", cursor:"pointer" }}
-                >
-                  List
-                </button>
-              </div>
-              <button
-                type="button"
-                onClick={() => navigate("/covers")}
-                style={{ background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe", borderRadius: 8, padding: "7px 14px", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
-              >
-                See All →
-              </button>
-            </div>
+            <Link
+              to="/covers"
+              className={`${interactionClass} rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200`}
+            >
+              View All
+            </Link>
           </div>
 
           {coversLoading ? (
-            <div style={{ color: "#64748b", fontWeight: 700 }}>Loading your cloud library...</div>
-          ) : covers.length === 0 ? (
-            <div style={{ background: "#f8fafc", padding: "40px", textAlign: "center", borderRadius: "12px", border: "1px dashed #cbd5e1" }}>
-              <div style={{ fontSize: "40px", marginBottom: "10px" }}>📁</div>
-              <div style={{ color: "#64748b", fontWeight: "bold" }}>No covers saved yet!</div>
-              <p style={{ color: "#94a3b8", fontSize: "14px" }}>Generate your first cover and it will appear here forever.</p>
+            <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-10 text-center text-sm font-semibold text-slate-500 dark:border-slate-700 dark:text-slate-400">
+              Loading your recent covers...
             </div>
-          ) : savedViewMode === "cards" ? (
-            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : isTablet ? "1fr 1fr" : "repeat(3, minmax(0, 1fr))", gap: "16px" }}>
-              {previewCovers.map((cover) => (
-                <div key={cover.id} style={{ background: "#fff", padding: "18px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px rgba(0,0,0,0.02)" }}>
-                  <div style={{ fontSize: "12px", color: "#2563eb", fontWeight: "bold", textTransform: "uppercase", marginBottom: "8px" }}>
-                    Course: {cover.coverData?.courseCode || "N/A"}
-                  </div>
-                  <h3 style={{ margin: "0 0 10px", fontSize: "16px", color: "#0f172a" }}>{cover.coverData?.topicName || "Untitled Assignment"}</h3>
-                  <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "6px" }}>
-                    Created: {new Date(cover.createdAt).toLocaleDateString()}
-                  </div>
-                  <div style={{ fontSize: "12px", color: "#b45309", marginBottom: "16px", fontWeight: 700 }}>
-                    Expires: {getExpiryDate(cover).toLocaleDateString()}
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: "10px" }}>
-                    <button onClick={() => handleDuplicate(cover)} style={{ flex: isMobile ? "none" : 1, width: isMobile ? "100%" : "auto", padding: "8px", background: "#f1f5f9", color: "#334155", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>
-                      🔄 Duplicate & Edit
-                    </button>
-                    <button onClick={() => navigate(`/share/${cover.id}`)} style={{ width: isMobile ? "100%" : "auto", padding: "8px 14px", background: "#e0e7ff", color: "#4f46e5", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: "pointer" }}>
-                      🔗 Link
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCover(cover.id)}
-                      disabled={deletingCoverId === cover.id}
-                      style={{ width: isMobile ? "100%" : "auto", padding: "8px 14px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: "6px", fontWeight: "bold", cursor: deletingCoverId === cover.id ? "not-allowed" : "pointer", opacity: deletingCoverId === cover.id ? 0.7 : 1 }}
-                    >
-                      {deletingCoverId === cover.id ? "Deleting..." : "🗑 Delete"}
-                    </button>
-                  </div>
-                </div>
-              ))}
+          ) : previewCovers.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-slate-200 px-4 py-10 text-center dark:border-slate-700">
+              <p className="text-base font-semibold text-slate-700 dark:text-slate-200">No covers created yet.</p>
+              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Generate your first one and it will appear here.</p>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {previewCovers.map((cover) => (
-                <div key={cover.id} style={{ background: "#fff", border: "1px solid #e2e8f0", borderRadius: 12, padding: isMobile ? "12px 10px" : "14px 12px", display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12, alignItems: isMobile ? "stretch" : "center", justifyContent: "space-between" }}>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 12, color: "#2563eb", fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>
-                      {cover.coverData?.courseCode || "N/A"}
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 800, color: "#0f172a", marginBottom: 4, lineHeight: 1.35 }}>
-                      {cover.coverData?.topicName || "Untitled Assignment"}
-                    </div>
-                    <div style={{ fontSize: 12, color: "#64748b" }}>
-                      Created: {new Date(cover.createdAt).toLocaleDateString()} · Expires: {getExpiryDate(cover).toLocaleDateString()}
-                    </div>
-                  </div>
-                  <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8, width: isMobile ? "100%" : "auto" }}>
-                    <button onClick={() => handleDuplicate(cover)} style={{ padding: "8px 10px", background: "#f1f5f9", color: "#334155", border: "none", borderRadius: 6, fontWeight: 700, cursor: "pointer", width: isMobile ? "100%" : "auto" }}>
-                      🔄 Duplicate
+                <div
+                  key={cover.id}
+                  className={`${interactionClass} rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950/60`}
+                >
+                  <p className="text-xs font-bold uppercase tracking-[0.15em] text-blue-600 dark:text-blue-300">
+                    {cover.coverData?.courseCode || 'Course N/A'}
+                  </p>
+                  <h3 className="mt-2 line-clamp-2 text-lg font-extrabold leading-tight text-slate-900 dark:text-slate-100">
+                    {cover.coverData?.topicName || 'Untitled Assignment'}
+                  </h3>
+                  <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Created: {new Date(cover.createdAt).toLocaleDateString()} • Expires: {getExpiryDate(cover).toLocaleDateString()}
+                  </p>
+
+                  <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    <button
+                      onClick={() => handleDuplicate(cover)}
+                      className={`${interactionClass} rounded-lg bg-slate-800 px-3 py-2 text-xs font-semibold text-white dark:bg-slate-700`}
+                    >
+                      Duplicate
                     </button>
-                    <button onClick={() => navigate(`/share/${cover.id}`)} style={{ padding: "8px 10px", background: "#e0e7ff", color: "#4f46e5", border: "none", borderRadius: 6, fontWeight: 700, cursor: "pointer", width: isMobile ? "100%" : "auto" }}>
-                      🔗 Link
+                    <button
+                      onClick={() => navigate(`/share/${cover.id}`)}
+                      className={`${interactionClass} rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white`}
+                    >
+                      Share
                     </button>
                     <button
                       onClick={() => handleDeleteCover(cover.id)}
                       disabled={deletingCoverId === cover.id}
-                      style={{ padding: "8px 10px", background: "#fee2e2", color: "#dc2626", border: "none", borderRadius: 6, fontWeight: 700, cursor: deletingCoverId === cover.id ? "not-allowed" : "pointer", opacity: deletingCoverId === cover.id ? 0.7 : 1, width: isMobile ? "100%" : "auto" }}
+                      className={`${interactionClass} rounded-lg bg-rose-600 px-3 py-2 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-70`}
                     >
-                      {deletingCoverId === cover.id ? "Deleting..." : "🗑 Delete"}
+                      {deletingCoverId === cover.id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
-      </div>
+        </motion.section>
+
+        <motion.section
+          initial={fadeInUp.initial}
+          whileInView={fadeInUp.whileInView}
+          transition={fadeInUp.transition}
+          viewport={fadeInUp.viewport}
+          className="grid gap-5 xl:grid-cols-[1.2fr_0.8fr]"
+        >
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 p-5 text-slate-100 dark:border-slate-700 sm:p-6">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-black tracking-tight">
+                  What Our <span className="text-cyan-300">Users</span> Say
+                </h2>
+                <p className="mt-1 max-w-2xl text-sm text-slate-300">
+                  Trusted by Bangladeshi students for fast, professional, print-ready cover pages. Showing top 10 highest-rated reviews.
+                </p>
+              </div>
+              <Link
+                to="/reviews"
+                className={`${interactionClass} rounded-xl border border-slate-500/60 bg-slate-900/50 px-3 py-2 text-xs font-semibold text-slate-100`}
+              >
+                More Reviews
+              </Link>
+            </div>
+
+            {reviewsLoading ? (
+              <div className="rounded-2xl border border-dashed border-slate-600 px-4 py-8 text-center text-sm font-semibold text-slate-300">
+                Loading top reviews carousel...
+              </div>
+            ) : !currentCarouselReview ? (
+              <div className="rounded-2xl border border-dashed border-slate-600 px-4 py-8 text-center text-sm font-semibold text-slate-300">
+                No reviews available yet. Ask users to share feedback.
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <div className="hidden grid-cols-[0.82fr_1.2fr_0.82fr] items-stretch gap-4 lg:grid">
+                  {[previousCarouselReview, currentCarouselReview, nextCarouselReview].map((review, idx) => {
+                    const isCenter = idx === 1;
+                    const author = getReviewDisplayName(review);
+                    return (
+                      <div
+                        key={`${review?.id}-${idx}-${activeCarouselIndex}`}
+                        className={`rounded-2xl border border-cyan-400/20 bg-slate-900/70 p-4 transition-all duration-500 ${isCenter ? 'scale-100 shadow-2xl shadow-cyan-500/15' : 'scale-95 opacity-55'}`}
+                      >
+                        <div className="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-3 py-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-bold text-white">{author}</p>
+                            <p className="text-xs text-blue-100">{new Date(review.createdAt).toLocaleDateString()}</p>
+                          </div>
+                          <p className="mt-1 text-xs text-blue-100">{review.headline || 'Verified CoverCraft BD Review'}</p>
+                        </div>
+                        <p className="mt-3 text-sm font-semibold text-amber-300">{starsFromRating(review.rating)}</p>
+                        <p className="mt-2 line-clamp-4 text-sm text-slate-200">{review.comment}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="rounded-2xl border border-cyan-400/30 bg-slate-900/75 p-4 lg:hidden">
+                  <div className="rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-3 py-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-bold text-white">{getReviewDisplayName(currentCarouselReview)}</p>
+                      <p className="text-xs text-blue-100">{new Date(currentCarouselReview.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <p className="mt-1 text-xs text-blue-100">{currentCarouselReview.headline || 'Verified CoverCraft BD Review'}</p>
+                  </div>
+                  <p className="mt-3 text-sm font-semibold text-amber-300">{starsFromRating(currentCarouselReview.rating)}</p>
+                  <p className="mt-2 text-sm text-slate-200">{currentCarouselReview.comment}</p>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    {reviews.map((review, idx) => (
+                      <button
+                        key={review.id}
+                        type="button"
+                        onClick={() => setActiveCarouselIndex(idx)}
+                        aria-label={`Show review ${idx + 1}`}
+                        className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${idx === activeCarouselIndex ? 'w-6 bg-cyan-300' : 'bg-slate-500 hover:bg-slate-300'}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveCarouselIndex((prev) => (prev - 1 + reviews.length) % reviews.length)}
+                      className={`${interactionClass} rounded-lg border border-slate-500/60 bg-slate-900/70 px-3 py-1.5 text-xs font-bold text-slate-100`}
+                    >
+                      Prev
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveCarouselIndex((prev) => (prev + 1) % reviews.length)}
+                      className={`${interactionClass} rounded-lg border border-slate-500/60 bg-slate-900/70 px-3 py-1.5 text-xs font-bold text-slate-100`}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+            <h3 className="text-lg font-black tracking-tight">Rate Your Experience</h3>
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Drop a quick rating and comment for the community.</p>
+
+            <form className="mt-4 space-y-4" onSubmit={handleReviewSubmit}>
+              <div>
+                <label className="mb-2 block text-xs font-bold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">
+                  Your Rating
+                </label>
+                <StarRating value={reviewRating} onChange={setReviewRating} disabled={reviewSubmitting} />
+                <p className="mt-2 text-xs font-semibold text-slate-500 dark:text-slate-400">{ratingLabel(reviewRating)}</p>
+              </div>
+
+              <div>
+                <label htmlFor="dashboard-review" className="mb-2 block text-xs font-bold uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400">
+                  Your Review
+                </label>
+                <textarea
+                  id="dashboard-review"
+                  rows={4}
+                  value={reviewComment}
+                  onChange={(event) => setReviewComment(event.target.value)}
+                  placeholder="Tell us how CoverCraft BD helped you..."
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-400 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"
+                />
+              </div>
+
+              {reviewError && (
+                <p className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700 dark:border-rose-400/40 dark:bg-rose-500/10 dark:text-rose-200">
+                  {reviewError}
+                </p>
+              )}
+
+              {reviewSuccess && (
+                <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700 dark:border-emerald-400/40 dark:bg-emerald-500/10 dark:text-emerald-200">
+                  {reviewSuccess}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                disabled={reviewSubmitting}
+                className={`${interactionClass} w-full rounded-xl bg-gradient-to-r from-blue-700 to-blue-500 px-4 py-2.5 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-70`}
+              >
+                {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
+          </div>
+        </motion.section>
+      </main>
     </div>
   );
 }

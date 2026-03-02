@@ -9,6 +9,7 @@ import PrintView from './pages/PrintView.jsx'
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import SharedCover from './pages/SharedCover.jsx'
 import SavedCovers from './pages/SavedCovers.jsx'
+import Reviews from './pages/Reviews'
 import AdminRoute from './components/AdminRoute'
 import type { ReactNode } from 'react'
 
@@ -33,6 +34,7 @@ function App() {
       {/* Protected routes */}
       <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
       <Route path="/covers" element={<PrivateRoute><SavedCovers /></PrivateRoute>} />
+      <Route path="/reviews" element={<PrivateRoute><Reviews /></PrivateRoute>} />
       <Route path="/profile/setup" element={<PrivateRoute><ProfileSetup /></PrivateRoute>} />
       <Route path="/create" element={<PrivateRoute><CoverDesigner /></PrivateRoute>} />
 

@@ -22,6 +22,7 @@ model User {
   status                UserStatus               @default(ACTIVE)
   profile               Profile?
   covers                Cover[]
+  reviews               Review[]
   auditLogs             AuditLog[]               @relation("AdminAuditLogs")
   requestedVerifications UniversityVerification[] @relation("VerificationRequester")
   reviewedVerifications  UniversityVerification[] @relation("VerificationReviewer")
@@ -70,6 +71,19 @@ model Cover {
   pngUrl     String?
   pdfUrl     String?
   createdAt  DateTime @default(now())
+}
+
+model Review {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating            Int
+  comment           String
+  displayName       String?
+  headline          String?
+  isCarouselVisible Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 }
 
 model Broadcast {

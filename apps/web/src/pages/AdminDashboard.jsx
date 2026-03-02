@@ -15,6 +15,9 @@ import {
   deleteUni,
   getTemplateAnalytics,
   getTemplatePerformanceAnalytics,
+  getAdminReviews,
+  createAdminReview,
+  updateAdminReview,
   updateBroadcast,
   getActiveBroadcast,
   getAbuseRiskUsers,
@@ -58,6 +61,7 @@ export default function AdminDashboard() {
   const [ticketStats, setTicketStats] = useState(null);
   const [auditLogs, setAuditLogs] = useState([]);
   const [roleMatrix, setRoleMatrix] = useState({});
+  const [carouselReviews, setCarouselReviews] = useState([]);
 
   // Broadcast state
   const [broadcast, setBroadcast] = useState({ message: "", isActive: false, type: "info" });
@@ -79,6 +83,14 @@ export default function AdminDashboard() {
   const [ticketForm, setTicketForm] = useState({ subject: "", message: "", priority: "NORMAL", email: user?.email || "" });
   const [abuseForm, setAbuseForm] = useState({ userId: "", type: "SPAM", score: 10, reason: "" });
   const [selectedLogoRequestIds, setSelectedLogoRequestIds] = useState([]);
+  const [carouselForm, setCarouselForm] = useState({
+    rating: 5,
+    displayName: "",
+    headline: "Trusted by students across Bangladesh",
+    comment: "",
+    isCarouselVisible: true,
+  });
+  const [editingCarouselReviewId, setEditingCarouselReviewId] = useState(null);
 
   useEffect(() => {
     if (!user) {
@@ -111,6 +123,7 @@ export default function AdminDashboard() {
         { label: "ticket stats", run: getSupportTicketStats },
         { label: "audit logs", run: getAuditLogs },
         { label: "role matrix", run: getRoleMatrix },
+        { label: "carousel reviews", run: () => getAdminReviews(100) },
       ];
       const responses = await Promise.allSettled(requests.map((item) => item.run()));
 
@@ -141,6 +154,7 @@ export default function AdminDashboard() {
       const ticketStatsData = dataOrNull(responses[12]);
       const auditData = dataOrNull(responses[13]);
       const roleMatrixData = dataOrNull(responses[14]);
+      const carouselReviewsData = dataOrNull(responses[15]);
 
       if (statsData && typeof statsData === "object") setStats(statsData);
       if (Array.isArray(usersData)) setUsers(usersData);
@@ -156,6 +170,7 @@ export default function AdminDashboard() {
       if (ticketStatsData && typeof ticketStatsData === "object") setTicketStats(ticketStatsData);
       if (Array.isArray(auditData)) setAuditLogs(auditData);
       if (roleMatrixData && typeof roleMatrixData === "object" && !Array.isArray(roleMatrixData)) setRoleMatrix(roleMatrixData);
+      if (Array.isArray(carouselReviewsData)) setCarouselReviews(carouselReviewsData);
 
       if (broadcastData && typeof broadcastData === "object") {
         setBroadcast({
@@ -425,6 +440,62 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleCarouselSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        rating: Number(carouselForm.rating) || 5,
+        displayName: carouselForm.displayName,
+        headline: carouselForm.headline,
+        comment: carouselForm.comment,
+        isCarouselVisible: Boolean(carouselForm.isCarouselVisible),
+      };
+
+      if (editingCarouselReviewId) {
+        await updateAdminReview(editingCarouselReviewId, payload);
+        alert("Carousel review updated.");
+      } else {
+        await createAdminReview(payload);
+        alert("Carousel review added.");
+      }
+
+      setCarouselForm({
+        rating: 5,
+        displayName: "",
+        headline: "Trusted by students across Bangladesh",
+        comment: "",
+        isCarouselVisible: true,
+      });
+      setEditingCarouselReviewId(null);
+      fetchData(false);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to save carousel review.");
+    }
+  };
+
+  const handleEditCarouselReview = (review) => {
+    setEditingCarouselReviewId(review.id);
+    setCarouselForm({
+      rating: Number(review.rating) || 5,
+      displayName: review.displayName || review.user?.name || "",
+      headline: review.headline || "Trusted by students across Bangladesh",
+      comment: review.comment || "",
+      isCarouselVisible: Boolean(review.isCarouselVisible),
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleToggleCarouselVisibility = async (review) => {
+    try {
+      await updateAdminReview(review.id, {
+        isCarouselVisible: !review.isCarouselVisible,
+      });
+      fetchData(false);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update visibility.");
+    }
+  };
+
   if (loading) {
     return (
       <div
@@ -466,6 +537,14 @@ export default function AdminDashboard() {
   const tabsPadding = isMobile ? "0 12px" : isTablet ? "0 20px" : "0 40px";
   const twoColGrid = isMobile ? "1fr" : "1fr 1fr";
   const universityFormGrid = isMobile ? "1fr" : isTablet ? "1fr 1fr" : "1fr 1fr 1fr 1fr auto";
+  const topCarouselPreview = [...carouselReviews]
+    .filter((review) => review.isCarouselVisible)
+    .sort((a, b) => {
+      const ratingDelta = Number(b.rating || 0) - Number(a.rating || 0);
+      if (ratingDelta !== 0) return ratingDelta;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    })
+    .slice(0, 10);
 
   return (
     <div style={{ minHeight: "100vh", background: "#f1f5f9", fontFamily: "'Segoe UI', sans-serif" }}>
@@ -491,7 +570,7 @@ export default function AdminDashboard() {
       </div>
 
       <div style={{ background: "#fff", borderBottom: "1px solid #e2e8f0", padding: tabsPadding, display: "flex", gap: isMobile ? 18 : 30, overflowX: "auto", whiteSpace: "nowrap" }}>
-        {["overview", "users", "universities", "approvals", "moderation", "operations", "flags", "support", "audit"].map((tab) => (
+        {["overview", "carousel", "users", "universities", "approvals", "moderation", "operations", "flags", "support", "audit"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -508,7 +587,7 @@ export default function AdminDashboard() {
               flexShrink: 0,
             }}
           >
-            {tab === "approvals" ? `Logo Approvals (${requests.length})` : tab}
+            {tab === "approvals" ? `Logo Approvals (${requests.length})` : tab === "carousel" ? "Review Carousel" : tab}
           </button>
         ))}
       </div>
@@ -600,6 +679,151 @@ export default function AdminDashboard() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "carousel" && (
+          <div style={{ display: "grid", gridTemplateColumns: isMobile || isTablet ? "1fr" : "1fr 1.25fr", gap: 20 }}>
+            <form onSubmit={handleCarouselSubmit} style={panelStyle}>
+              <h3 style={{ marginTop: 0 }}>Manage Dashboard Carousel Reviews</h3>
+              <div style={{ fontSize: 13, color: "#64748b", marginBottom: 12 }}>
+                Add or edit testimonials that appear in the user dashboard carousel.
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 10 }}>
+                <select
+                  value={carouselForm.rating}
+                  onChange={(e) => setCarouselForm({ ...carouselForm, rating: Number(e.target.value) || 5 })}
+                  style={inputStyle}
+                >
+                  {[5, 4, 3, 2, 1].map((rating) => (
+                    <option key={rating} value={rating}>
+                      {rating} Star
+                    </option>
+                  ))}
+                </select>
+                <input
+                  value={carouselForm.displayName}
+                  onChange={(e) => setCarouselForm({ ...carouselForm, displayName: e.target.value })}
+                  style={inputStyle}
+                  placeholder="Display name (optional override)"
+                />
+              </div>
+
+              <input
+                value={carouselForm.headline}
+                onChange={(e) => setCarouselForm({ ...carouselForm, headline: e.target.value })}
+                style={{ ...inputStyle, marginTop: 10 }}
+                placeholder="Short headline (e.g. Trusted by students across Bangladesh)"
+              />
+
+              <textarea
+                value={carouselForm.comment}
+                onChange={(e) => setCarouselForm({ ...carouselForm, comment: e.target.value })}
+                style={{ ...inputStyle, marginTop: 10, minHeight: 100 }}
+                placeholder="Review text for carousel card"
+                required
+              />
+
+              <label style={{ ...inputStyle, marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
+                <input
+                  type="checkbox"
+                  checked={carouselForm.isCarouselVisible}
+                  onChange={(e) => setCarouselForm({ ...carouselForm, isCarouselVisible: e.target.checked })}
+                />
+                Show this review in dashboard carousel
+              </label>
+
+              <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
+                {editingCarouselReviewId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingCarouselReviewId(null);
+                      setCarouselForm({
+                        rating: 5,
+                        displayName: "",
+                        headline: "Trusted by students across Bangladesh",
+                        comment: "",
+                        isCarouselVisible: true,
+                      });
+                    }}
+                    style={{ ...tinyBtn, padding: "10px 12px" }}
+                  >
+                    Cancel Edit
+                  </button>
+                )}
+                <button type="submit" style={{ ...primaryBtn, marginTop: 0, width: "auto", minWidth: 180 }}>
+                  {editingCarouselReviewId ? "Update Carousel Review" : "Add Carousel Review"}
+                </button>
+              </div>
+            </form>
+
+            <div style={panelStyle}>
+              <h3 style={{ marginTop: 0 }}>Top 10 Auto-Carousel Reviews</h3>
+              {topCarouselPreview.length === 0 ? (
+                <div style={{ color: "#64748b", fontSize: 13 }}>No visible reviews for carousel yet.</div>
+              ) : (
+                <div style={{ maxHeight: 520, overflowY: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {topCarouselPreview.map((review, index) => (
+                    <div key={review.id} style={{ border: "1px solid #e2e8f0", borderRadius: 10, padding: 12, background: "#f8fafc" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                        <strong style={{ color: "#0f172a" }}>
+                          #{index + 1} · {review.displayName || review.user?.name || "CoverCraft User"}
+                        </strong>
+                        <span style={{ fontSize: 12, color: "#b45309", fontWeight: 800 }}>
+                          {"★".repeat(Number(review.rating || 0))}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                        {review.headline || "Trusted by students across Bangladesh"}
+                      </div>
+                      <div style={{ fontSize: 13, color: "#334155", marginTop: 6 }}>
+                        {review.comment}
+                      </div>
+                      <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+                        <button onClick={() => handleEditCarouselReview(review)} style={tinyBtn}>
+                          Edit
+                        </button>
+                        <button onClick={() => handleToggleCarouselVisibility(review)} style={dangerBtn}>
+                          {review.isCarouselVisible ? "Hide from Carousel" : "Show in Carousel"}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ marginTop: 16, borderTop: "1px solid #e2e8f0", paddingTop: 14 }}>
+                <h4 style={{ margin: "0 0 10px", fontSize: 14 }}>All Managed Reviews ({carouselReviews.length})</h4>
+                {carouselReviews.length === 0 ? (
+                  <div style={{ color: "#64748b", fontSize: 13 }}>No reviews found.</div>
+                ) : (
+                  <div style={{ maxHeight: 230, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8 }}>
+                    {carouselReviews.map((review) => (
+                      <div key={review.id} style={{ border: "1px solid #e2e8f0", borderRadius: 8, padding: "8px 10px", background: review.isCarouselVisible ? "#f8fafc" : "#fff7ed" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                          <div style={{ fontSize: 12, fontWeight: 700, color: "#0f172a" }}>
+                            {review.displayName || review.user?.name || "CoverCraft User"} · {review.rating}★
+                          </div>
+                          <div style={{ fontSize: 11, color: review.isCarouselVisible ? "#166534" : "#b45309", fontWeight: 700 }}>
+                            {review.isCarouselVisible ? "VISIBLE" : "HIDDEN"}
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8, marginTop: 6 }}>
+                          <button onClick={() => handleEditCarouselReview(review)} style={tinyBtn}>
+                            Edit
+                          </button>
+                          <button onClick={() => handleToggleCarouselVisibility(review)} style={dangerBtn}>
+                            Toggle
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
