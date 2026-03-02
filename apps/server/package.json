@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "nodemon --exec \"node --require ts-node/register src/index.ts\" --ext ts",
     "build": "node -e \"require('fs').rmSync('dist',{ recursive:true, force:true })\" && tsc",
-    "start": "npx prisma generate && npx puppeteer browsers install chrome && npx prisma db push --accept-data-loss && node dist/src/index.js",
+    "start": "npx prisma generate && npx prisma migrate deploy && npx puppeteer browsers install chrome && node dist/src/index.js",
     "seed": "ts-node prisma/seed.ts",
     "sync:logos": "ts-node prisma/sync-logos.ts"
   },

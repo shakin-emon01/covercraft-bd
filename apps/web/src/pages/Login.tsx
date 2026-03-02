@@ -15,9 +15,10 @@ export default function Login() {
   const [showPass, setShowPass] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
-  const { isMobile, isTablet } = useViewport();
+  const { isMobile, isTablet, width } = useViewport();
   const showIntroPanel = !isMobile && !isTablet;
   const googleButtonWidth = isMobile ? 280 : isTablet ? 340 : 380;
+  const mobileGoogleWidth = Math.max(240, Math.min(340, width - 44));
   const getApiErrorMessage = (error: unknown, fallback: string) => {
     if (typeof error === "object" && error !== null) {
       const maybeError = error as { response?: { data?: { message?: string } } };
@@ -54,6 +55,117 @@ export default function Login() {
       setError(getApiErrorMessage(err, "Google login failed. Please try again."));
     }
   };
+
+  if (isMobile) {
+    return (
+      <div className="mobile-auth-shell mobile-auth-shell-login">
+        <div className="mobile-auth-orb mobile-auth-orb-a" />
+        <div className="mobile-auth-orb mobile-auth-orb-b" />
+        <div className="mobile-auth-grid" />
+
+        <div className="mobile-auth-card">
+          <div className="mobile-auth-brand-row">
+            <img src="/logo.png" alt="CoverCraft BD" className="mobile-auth-logo" />
+            <div>
+              <h1 className="mobile-auth-brand-title">CoverCraft BD</h1>
+              <p className="mobile-auth-brand-subtitle">Smart academic cover generator</p>
+            </div>
+          </div>
+
+          <div className="mobile-auth-feature-stack">
+            {[
+              { icon: "✨", text: "15+ Premium Studio-Quality Templates" },
+              { icon: "🏛️", text: "Supports 170+ BD Universities" },
+              { icon: "🚀", text: "Instant High-Res Export (PDF, PNG, ZIP)" },
+            ].map((feature) => (
+              <div key={feature.text} className="mobile-auth-feature-item">
+                <span className="mobile-auth-feature-icon">{feature.icon}</span>
+                <span className="mobile-auth-feature-text">{feature.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 10, marginBottom: 16 }}>
+            <div style={{ fontSize: 11, color: "#9fb4dd", letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>WELCOME BACK</div>
+            <h2 style={{ fontSize: 31, fontWeight: 900, color: "#ffffff", margin: "0 0 4px", lineHeight: 1.08, letterSpacing: -0.8 }}>Sign in</h2>
+            <p style={{ fontSize: 13, color: "rgba(220,233,255,0.85)", margin: 0 }}>
+              New here? <Link to="/register" style={{ color: "#93c5fd", fontWeight: 700, textDecoration: "none" }}>Create free account</Link>
+            </p>
+          </div>
+
+          {error && (
+            <div style={{ background: "rgba(127, 29, 29, 0.45)", border: "1px solid rgba(252,165,165,0.55)", borderRadius: 10, padding: "9px 11px", marginBottom: 12, fontSize: 12.5, color: "#fecaca", display: "flex", alignItems: "center", gap: 7 }}>
+              <span>⚠️</span> {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin}>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 10.5, fontWeight: 700, color: "#dbeafe", letterSpacing: 1.1, marginBottom: 5 }}>EMAIL ADDRESS</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                required
+                className="mobile-auth-input"
+                onFocus={(e) => e.target.style.border = "1.5px solid #60a5fa"}
+                onBlur={(e) => e.target.style.border = "1.5px solid rgba(148,163,184,0.35)"}
+              />
+            </div>
+
+            <div style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: 10.5, fontWeight: 700, color: "#dbeafe", letterSpacing: 1.1, marginBottom: 5 }}>PASSWORD</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPass ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                  className="mobile-auth-input"
+                  style={{ paddingRight: 42 }}
+                  onFocus={(e) => e.target.style.border = "1.5px solid #60a5fa"}
+                  onBlur={(e) => e.target.style.border = "1.5px solid rgba(148,163,184,0.35)"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(!showPass)}
+                  style={{ position: "absolute", right: 11, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 15, color: "#bfdbfe" }}
+                >
+                  {showPass ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} className="mobile-auth-primary-btn">
+              {loading ? "Signing in..." : "Sign In →"}
+            </button>
+          </form>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "14px 0 12px" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(148,163,184,0.35)" }} />
+            <span style={{ fontSize: 10.5, color: "#b6c6e6", fontWeight: 700 }}>OR CONTINUE WITH</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(148,163,184,0.35)" }} />
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {isGoogleAuthConfigured ? (
+              <GoogleLogin onSuccess={handleGoogle} onError={() => setError("Google login failed")} theme="outline" size="large" width={mobileGoogleWidth} />
+            ) : (
+              <div style={{ width: "100%", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 10, padding: "10px 12px", textAlign: "center", fontSize: 12, color: "#cbd5e1", background: "rgba(15,23,42,0.34)", lineHeight: 1.5 }}>
+                Google sign-in is not configured yet. Set a valid <code>VITE_GOOGLE_CLIENT_ID</code> in <code>apps/web/.env</code>.
+              </div>
+            )}
+          </div>
+
+          <p style={{ textAlign: "center", fontSize: 10.5, color: "rgba(191,219,254,0.75)", marginTop: 12, marginBottom: 0 }}>
+            Fast login. Secure access. Start creating instantly.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight:"100vh", display:"flex", flexDirection:showIntroPanel?"row":"column", fontFamily:"'Segoe UI',sans-serif", background:showIntroPanel?"#0f172a":"#f8fafc" }}>

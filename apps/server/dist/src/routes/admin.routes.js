@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const admin_controller_1 = require("../controllers/admin.controller");
+const review_admin_controller_1 = require("../controllers/review.admin.controller");
 const auth_middleware_1 = require("../middleware/auth.middleware");
 const router = (0, express_1.Router)();
 router.use(auth_middleware_1.authenticate, auth_middleware_1.requireAdmin);
@@ -25,8 +26,12 @@ router.post('/verifications', (0, auth_middleware_1.requirePermission)('verifica
 router.post('/verifications/:id/review', (0, auth_middleware_1.requirePermission)('verification.manage'), admin_controller_1.reviewUniversityVerification);
 router.get('/logo-requests', (0, auth_middleware_1.requirePermission)('logos.review'), admin_controller_1.getPendingLogoRequests);
 router.post('/logo-requests/:id/resolve', (0, auth_middleware_1.requirePermission)('logos.review'), admin_controller_1.reviewLogoRequest);
+router.post('/logo-requests/bulk-resolve', (0, auth_middleware_1.requirePermission)('logos.review'), admin_controller_1.reviewLogoRequestsBulk);
 router.get('/analytics/templates', (0, auth_middleware_1.requirePermission)('analytics.view'), admin_controller_1.getTemplateAnalytics);
 router.get('/analytics/templates/performance', (0, auth_middleware_1.requirePermission)('analytics.view'), admin_controller_1.getTemplatePerformanceAnalytics);
+router.get('/reviews', review_admin_controller_1.getAdminReviews);
+router.post('/reviews', review_admin_controller_1.createAdminReview);
+router.patch('/reviews/:id', review_admin_controller_1.updateAdminReview);
 router.post('/broadcast', (0, auth_middleware_1.requirePermission)('broadcast.manage'), admin_controller_1.updateBroadcast);
 router.get('/alerts', (0, auth_middleware_1.requirePermission)('alerts.manage'), admin_controller_1.getOperationalAlerts);
 router.post('/alerts', (0, auth_middleware_1.requirePermission)('alerts.manage'), admin_controller_1.createOperationalAlert);

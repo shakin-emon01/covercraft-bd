@@ -33,3 +33,313 @@ body {
   background: #020617;
   color: #e2e8f0;
 }
+
+/* Cover Designer interaction polish */
+.cc-hover-btn {
+  transition: all 0.3s ease;
+  transform: translateY(0) scale(1);
+  will-change: transform, box-shadow, filter;
+}
+
+.cc-hover-btn:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.03);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.26);
+  filter: brightness(1.05);
+}
+
+.cc-hover-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+}
+
+.cc-hover-btn:disabled {
+  opacity: 0.7;
+}
+
+.cc-hover-card {
+  transition: all 0.3s ease;
+  transform: translateY(0) scale(1);
+}
+
+.cc-hover-card:hover {
+  transform: translateY(-2px) scale(1.008);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.18);
+}
+
+.dark .cc-hover-card:hover {
+  box-shadow: 0 16px 32px rgba(2, 6, 23, 0.58);
+}
+
+.cc-tab-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.cc-tab-btn {
+  border-radius: 9px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.cc-tab-btn:hover {
+  transform: translateY(-1px) scale(1.03);
+}
+
+.cc-tab-btn.is-active {
+  box-shadow: 0 10px 20px rgba(30, 64, 175, 0.32);
+}
+
+/* Mobile auth pages */
+@keyframes mobileAuthFloat {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes mobileAuthPulse {
+  0% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.38; transform: scale(1.05); }
+  100% { opacity: 0.2; transform: scale(1); }
+}
+
+@keyframes mobileAuthSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mobile-auth-shell {
+  position: relative;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 12px;
+  overflow: hidden;
+}
+
+.mobile-auth-shell-login {
+  background: linear-gradient(145deg, #06132d 0%, #11254c 48%, #1d3a73 100%);
+}
+
+.mobile-auth-shell-register {
+  background: linear-gradient(145deg, #072b28 0%, #0b243f 50%, #0e5a4b 100%);
+}
+
+.mobile-auth-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 34px 34px;
+}
+
+.mobile-auth-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(2px);
+  animation: mobileAuthPulse 6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.mobile-auth-orb-a {
+  width: 230px;
+  height: 230px;
+  top: -80px;
+  left: -80px;
+  background: radial-gradient(circle at center, rgba(125, 211, 252, 0.28) 0%, rgba(14, 116, 144, 0.1) 70%, transparent 100%);
+}
+
+.mobile-auth-orb-b {
+  width: 240px;
+  height: 240px;
+  right: -85px;
+  bottom: -92px;
+  background: radial-gradient(circle at center, rgba(110, 231, 183, 0.25) 0%, rgba(16, 185, 129, 0.08) 70%, transparent 100%);
+}
+
+.mobile-auth-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 404px;
+  border: 1px solid rgba(147, 197, 253, 0.35);
+  border-radius: 18px;
+  background: linear-gradient(165deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.72) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 20px 45px rgba(2, 6, 23, 0.55);
+  padding: 16px 16px 14px;
+  animation: mobileAuthSlideUp 0.4s ease-out;
+}
+
+.mobile-auth-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mobile-auth-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid rgba(191, 219, 254, 0.4);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.18);
+  animation: mobileAuthFloat 4.2s ease-in-out infinite;
+}
+
+.mobile-auth-brand-title {
+  margin: 0;
+  font-size: 27px;
+  line-height: 1.08;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: -0.35px;
+}
+
+.mobile-auth-brand-subtitle {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.mobile-auth-chip-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.mobile-auth-chip {
+  font-size: 10px;
+  font-weight: 700;
+  color: #dbeafe;
+  border: 1px solid rgba(125, 211, 252, 0.34);
+  background: rgba(15, 23, 42, 0.42);
+  border-radius: 999px;
+  padding: 3px 8px;
+  transition: all 0.28s ease;
+}
+
+.mobile-auth-chip:hover {
+  transform: translateY(-1px);
+  background: rgba(30, 64, 175, 0.35);
+}
+
+.mobile-auth-feature-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.mobile-auth-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(147, 197, 253, 0.28);
+  background: linear-gradient(135deg, rgba(30, 58, 138, 0.22) 0%, rgba(30, 41, 59, 0.5) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 8px 20px rgba(2, 6, 23, 0.32);
+  transition: all 0.3s ease;
+}
+
+.mobile-auth-feature-item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(147, 197, 253, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 12px 24px rgba(2, 6, 23, 0.4);
+}
+
+.mobile-auth-feature-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #dbeafe;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.34) 0%, rgba(30, 64, 175, 0.52) 100%);
+  border: 1px solid rgba(125, 211, 252, 0.55);
+}
+
+.mobile-auth-feature-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: #e2e8f0;
+  line-height: 1.4;
+  letter-spacing: 0.1px;
+}
+
+.mobile-auth-feature-item-register {
+  border-color: rgba(52, 211, 153, 0.3);
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.22) 0%, rgba(30, 41, 59, 0.5) 100%);
+}
+
+.mobile-auth-feature-icon-register {
+  color: #ccfbf1;
+  background: linear-gradient(135deg, rgba(45, 212, 191, 0.25) 0%, rgba(15, 118, 110, 0.45) 100%);
+  border-color: rgba(110, 231, 183, 0.55);
+  font-size: 12px;
+}
+
+.mobile-auth-input {
+  width: 100%;
+  border-radius: 10px;
+  border: 1.5px solid rgba(148, 163, 184, 0.35);
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: #f8fafc;
+  background: rgba(2, 6, 23, 0.5);
+  box-sizing: border-box;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.mobile-auth-input::placeholder {
+  color: #94a3b8;
+}
+
+.mobile-auth-input:hover {
+  border-color: rgba(147, 197, 253, 0.6);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.3);
+}
+
+.mobile-auth-primary-btn {
+  width: 100%;
+  border: none;
+  border-radius: 11px;
+  padding: 11px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  color: #ffffff;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  box-shadow: 0 12px 22px rgba(37, 99, 235, 0.36);
+  transition: all 0.3s ease;
+}
+
+.mobile-auth-primary-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 16px 28px rgba(37, 99, 235, 0.45);
+  filter: brightness(1.06);
+}
+
+.mobile-auth-primary-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.mobile-auth-primary-btn-register {
+  background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+  box-shadow: 0 12px 22px rgba(20, 184, 166, 0.3);
+}

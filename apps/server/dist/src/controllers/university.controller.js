@@ -7,6 +7,7 @@ exports.submitLogoRequest = exports.getUniversityById = exports.getAllUniversiti
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
+const uploads_1 = require("../lib/uploads");
 const getAllUniversities = async (req, res) => {
     try {
         const universities = await prisma_1.default.university.findMany({
@@ -65,16 +66,12 @@ const submitLogoRequest = async (req, res) => {
         const ext = mimeSubtype === 'png' ? '.png' : '.jpg';
         const newFileName = `req-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
         // Create folder if not exists
-        const uploadDir = path_1.default.join(process.cwd(), 'uploads/requests');
-        if (!fs_1.default.existsSync(uploadDir)) {
-            fs_1.default.mkdirSync(uploadDir, { recursive: true });
-        }
+        const uploadDir = (0, uploads_1.ensureUploadsDir)('requests');
         // Save strictly validated file to disk.
         const filePath = path_1.default.join(uploadDir, newFileName);
         fs_1.default.writeFileSync(filePath, buffer);
         // Update database
-        const baseUrl = process.env.API_PUBLIC_URL || `http://localhost:${process.env.PORT || 5000}`;
-        const pendingLogoUrl = `${baseUrl}/uploads/requests/${newFileName}`;
+        const pendingLogoUrl = (0, uploads_1.buildUploadUrl)('requests', newFileName);
         await prisma_1.default.university.update({
             where: { id: req.params.id },
             data: { pendingLogoUrl },

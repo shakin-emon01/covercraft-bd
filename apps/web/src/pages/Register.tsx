@@ -15,7 +15,8 @@ export default function Register() {
   const [showPass, setShowPass] = useState(false);
   const { setAuth } = useAuthStore();
   const navigate = useNavigate();
-  const { isMobile, isTablet } = useViewport();
+  const { isMobile, isTablet, width } = useViewport();
+  const mobileGoogleWidth = Math.max(240, Math.min(340, width - 44));
 
   const update = (k: keyof FormState, v: string) => setForm((p) => ({ ...p, [k]: v }));
   const getApiErrorMessage = (error: unknown, fallback: string) => {
@@ -61,6 +62,141 @@ export default function Register() {
   const strengthColor = ["#e2e8f0","#ef4444","#f59e0b","#22c55e"][strength];
   const strengthLabel = ["","Weak","Good","Strong"][strength];
   const showIntroPanel = !isTablet && !isMobile;
+
+  if (isMobile) {
+    return (
+      <div className="mobile-auth-shell mobile-auth-shell-register">
+        <div className="mobile-auth-orb mobile-auth-orb-a" />
+        <div className="mobile-auth-orb mobile-auth-orb-b" />
+        <div className="mobile-auth-grid" />
+
+        <div className="mobile-auth-card">
+          <div className="mobile-auth-brand-row">
+            <img src="/logo.png" alt="CoverCraft BD" className="mobile-auth-logo" />
+            <div>
+              <h1 className="mobile-auth-brand-title">CoverCraft BD</h1>
+              <p className="mobile-auth-brand-subtitle">Create premium covers in minutes</p>
+            </div>
+          </div>
+
+          <div className="mobile-auth-feature-stack">
+            {[
+              { icon: "01", text: "Create your account" },
+              { icon: "02", text: "Set up your profile" },
+              { icon: "03", text: "Generate cover pages" },
+            ].map((step) => (
+              <div key={step.text} className="mobile-auth-feature-item mobile-auth-feature-item-register">
+                <span className="mobile-auth-feature-icon mobile-auth-feature-icon-register">{step.icon}</span>
+                <span className="mobile-auth-feature-text">{step.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ marginTop: 8, marginBottom: 14 }}>
+            <div style={{ fontSize: 11, color: "#a7f3d0", letterSpacing: 3, fontWeight: 700, marginBottom: 8 }}>GET STARTED FREE</div>
+            <h2 style={{ fontSize: 31, fontWeight: 900, color: "#ffffff", margin: "0 0 4px", lineHeight: 1.08, letterSpacing: -0.7 }}>Create account</h2>
+            <p style={{ fontSize: 13, color: "rgba(220,252,231,0.85)", margin: 0 }}>
+              Already registered? <Link to="/login" style={{ color: "#5eead4", fontWeight: 700, textDecoration: "none" }}>Sign in</Link>
+            </p>
+          </div>
+
+          {error && (
+            <div style={{ background: "rgba(127, 29, 29, 0.45)", border: "1px solid rgba(252,165,165,0.55)", borderRadius: 10, padding: "9px 11px", marginBottom: 11, fontSize: 12.5, color: "#fecaca", display: "flex", alignItems: "center", gap: 7 }}>
+              <span>⚠️</span> {error}
+            </div>
+          )}
+
+          <form onSubmit={handleRegister}>
+            {[
+              { label: "FULL NAME", key: "name", type: "text", placeholder: "Your full name" },
+              { label: "EMAIL ADDRESS", key: "email", type: "email", placeholder: "you@example.com" },
+            ].map((field) => (
+              <div key={field.key} style={{ marginBottom: 10 }}>
+                <label style={{ display: "block", fontSize: 10.5, fontWeight: 700, color: "#dcfce7", letterSpacing: 1.1, marginBottom: 5 }}>{field.label}</label>
+                <input
+                  type={field.type}
+                  value={form[field.key as keyof FormState]}
+                  onChange={(e) => update(field.key as keyof FormState, e.target.value)}
+                  placeholder={field.placeholder}
+                  required
+                  className="mobile-auth-input"
+                  onFocus={(e) => e.target.style.border = "1.5px solid #34d399"}
+                  onBlur={(e) => e.target.style.border = "1.5px solid rgba(148,163,184,0.35)"}
+                />
+              </div>
+            ))}
+
+            <div style={{ marginBottom: 8 }}>
+              <label style={{ display: "block", fontSize: 10.5, fontWeight: 700, color: "#dcfce7", letterSpacing: 1.1, marginBottom: 5 }}>PASSWORD</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  type={showPass ? "text" : "password"}
+                  value={form.password}
+                  onChange={(e) => update("password", e.target.value)}
+                  placeholder="Min. 6 characters"
+                  required
+                  className="mobile-auth-input"
+                  style={{ paddingRight: 42 }}
+                  onFocus={(e) => e.target.style.border = "1.5px solid #34d399"}
+                  onBlur={(e) => e.target.style.border = "1.5px solid rgba(148,163,184,0.35)"}
+                />
+                <button type="button" onClick={() => setShowPass(!showPass)} style={{ position: "absolute", right: 11, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 15, color: "#bbf7d0" }}>
+                  {showPass ? "🙈" : "👁️"}
+                </button>
+              </div>
+            </div>
+
+            {form.password.length > 0 && (
+              <div style={{ marginBottom: 9 }}>
+                <div style={{ display: "flex", gap: 4, marginBottom: 4 }}>
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i <= strength ? strengthColor : "rgba(148,163,184,0.35)", transition: "background 0.3s" }} />
+                  ))}
+                </div>
+                <div style={{ fontSize: 10.5, color: strengthColor, fontWeight: 700 }}>{strengthLabel}</div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ display: "block", fontSize: 10.5, fontWeight: 700, color: "#dcfce7", letterSpacing: 1.1, marginBottom: 5 }}>CONFIRM PASSWORD</label>
+              <input
+                type="password"
+                value={form.confirm}
+                onChange={(e) => update("confirm", e.target.value)}
+                placeholder="Re-enter your password"
+                required
+                className="mobile-auth-input"
+                style={{ border: `1.5px solid ${form.confirm && form.confirm !== form.password ? "rgba(248,113,113,0.75)" : "rgba(148,163,184,0.35)"}` }}
+                onFocus={(e) => e.target.style.border = "1.5px solid #34d399"}
+                onBlur={(e) => e.target.style.border = form.confirm && form.confirm !== form.password ? "1.5px solid rgba(248,113,113,0.75)" : "1.5px solid rgba(148,163,184,0.35)"}
+              />
+              {form.confirm && form.confirm !== form.password && <div style={{ fontSize: 11, color: "#fca5a5", marginTop: 4 }}>Passwords don't match</div>}
+            </div>
+
+            <button type="submit" disabled={loading} className="mobile-auth-primary-btn mobile-auth-primary-btn-register">
+              {loading ? "Creating account..." : "Create Account →"}
+            </button>
+          </form>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, margin: "12px 0 10px" }}>
+            <div style={{ flex: 1, height: 1, background: "rgba(148,163,184,0.35)" }} />
+            <span style={{ fontSize: 10.5, color: "#bbf7d0", fontWeight: 700 }}>OR</span>
+            <div style={{ flex: 1, height: 1, background: "rgba(148,163,184,0.35)" }} />
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {isGoogleAuthConfigured ? (
+              <GoogleLogin onSuccess={handleGoogle} onError={() => setError("Google sign-up failed")} theme="outline" size="large" width={mobileGoogleWidth} />
+            ) : (
+              <div style={{ width: "100%", border: "1px solid rgba(148,163,184,0.35)", borderRadius: 10, padding: "10px 12px", textAlign: "center", fontSize: 12, color: "#d1fae5", background: "rgba(15,23,42,0.34)", lineHeight: 1.5 }}>
+                Google sign-up is not configured yet. Set a valid <code>VITE_GOOGLE_CLIENT_ID</code> in <code>apps/web/.env</code>.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight:"100vh", display:"flex", flexDirection:isMobile?"column":"row", fontFamily:"'Segoe UI',sans-serif", background:"#0f172a" }}>

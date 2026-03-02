@@ -3,12 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadUniversityLogo = exports.upload = exports.updateSupportTicket = exports.createSupportTicket = exports.getSupportTicketStats = exports.getSupportTickets = exports.deleteFeatureFlag = exports.upsertFeatureFlag = exports.getPublicFeatureFlags = exports.getFeatureFlags = exports.resolveOperationalAlert = exports.createOperationalAlert = exports.getOperationalAlerts = exports.getActiveBroadcast = exports.updateBroadcast = exports.getTemplatePerformanceAnalytics = exports.getTemplateAnalytics = exports.massUserAction = exports.deleteUser = exports.reviewLogoRequest = exports.getPendingLogoRequests = exports.reviewUniversityVerification = exports.getUniversityVerifications = exports.createUniversityVerificationRequest = exports.syncUniversitiesByAdmin = exports.deleteUniversity = exports.updateUniversity = exports.addUniversity = exports.getAllUniversitiesAdmin = exports.markAbuseSignalReviewed = exports.createAbuseSignal = exports.getAbuseRiskUsers = exports.updateUserRoleAndStatus = exports.getRoleMatrix = exports.getAuditLogs = exports.getAdminCovers = exports.getAdminUsers = exports.getAdminStats = void 0;
+exports.uploadUniversityLogo = exports.upload = exports.updateSupportTicket = exports.createSupportTicket = exports.getSupportTicketStats = exports.getSupportTickets = exports.deleteFeatureFlag = exports.upsertFeatureFlag = exports.getPublicFeatureFlags = exports.getFeatureFlags = exports.resolveOperationalAlert = exports.createOperationalAlert = exports.getOperationalAlerts = exports.getActiveBroadcast = exports.updateBroadcast = exports.getTemplatePerformanceAnalytics = exports.getTemplateAnalytics = exports.massUserAction = exports.deleteUser = exports.reviewLogoRequestsBulk = exports.reviewLogoRequest = exports.getPendingLogoRequests = exports.reviewUniversityVerification = exports.getUniversityVerifications = exports.createUniversityVerificationRequest = exports.syncUniversitiesByAdmin = exports.deleteUniversity = exports.updateUniversity = exports.addUniversity = exports.getAllUniversitiesAdmin = exports.markAbuseSignalReviewed = exports.createAbuseSignal = exports.getAbuseRiskUsers = exports.updateUserRoleAndStatus = exports.getRoleMatrix = exports.getAuditLogs = exports.getAdminCovers = exports.getAdminUsers = exports.getAdminStats = void 0;
 const multer_1 = __importDefault(require("multer"));
 const path_1 = __importDefault(require("path"));
-const fs_1 = __importDefault(require("fs"));
 const prisma_1 = __importDefault(require("../lib/prisma"));
 const auth_middleware_1 = require("../middleware/auth.middleware");
+const uploads_1 = require("../lib/uploads");
 const DEFAULT_TAKE = 200;
 const toCleanString = (value) => String(value ?? '').trim();
 const logAudit = async (adminId, action, entityType, entityId, details) => {
@@ -492,10 +492,11 @@ const reviewUniversityVerification = async (req, res) => {
         if (verification.status !== 'PENDING')
             return res.status(400).json({ message: 'This request is already reviewed.' });
         if (action === 'APPROVE' && verification.requestType === 'LOGO' && verification.proposedLogoUrl) {
+            const approvedLogoUrl = (0, uploads_1.promoteRequestLogoIfNeeded)(verification.proposedLogoUrl);
             await prisma_1.default.university.update({
                 where: { id: verification.universityId },
                 data: {
-                    logoUrl: verification.proposedLogoUrl,
+                    logoUrl: approvedLogoUrl,
                     pendingLogoUrl: null,
                 },
             });
@@ -532,6 +533,40 @@ const getPendingLogoRequests = async (_req, res) => {
     }
 };
 exports.getPendingLogoRequests = getPendingLogoRequests;
+const resolveLogoRequestByUniversityId = async (universityId, action, reviewerId) => {
+    const university = await prisma_1.default.university.findUnique({ where: { id: universityId } });
+    if (!university || !university.pendingLogoUrl) {
+        return { resolved: false, reason: 'No pending logo found' };
+    }
+    if (action === 'APPROVE') {
+        const approvedLogoUrl = (0, uploads_1.promoteRequestLogoIfNeeded)(university.pendingLogoUrl);
+        await prisma_1.default.university.update({
+            where: { id: universityId },
+            data: { logoUrl: approvedLogoUrl, pendingLogoUrl: null },
+        });
+    }
+    else {
+        await prisma_1.default.university.update({
+            where: { id: universityId },
+            data: { pendingLogoUrl: null },
+        });
+    }
+    const latestPendingVerification = await prisma_1.default.universityVerification.findFirst({
+        where: { universityId, requestType: 'LOGO', status: 'PENDING' },
+        orderBy: { createdAt: 'desc' },
+    });
+    if (latestPendingVerification) {
+        await prisma_1.default.universityVerification.update({
+            where: { id: latestPendingVerification.id },
+            data: {
+                status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+                reviewedById: reviewerId,
+                reviewedAt: new Date(),
+            },
+        });
+    }
+    return { resolved: true };
+};
 const reviewLogoRequest = async (req, res) => {
     try {
         const { id } = req.params;
@@ -539,35 +574,9 @@ const reviewLogoRequest = async (req, res) => {
         if (!action || !['APPROVE', 'REJECT'].includes(action)) {
             return res.status(400).json({ message: 'Invalid action' });
         }
-        const university = await prisma_1.default.university.findUnique({ where: { id } });
-        if (!university || !university.pendingLogoUrl) {
+        const result = await resolveLogoRequestByUniversityId(id, action, req.userId);
+        if (!result.resolved) {
             return res.status(404).json({ message: 'No pending logo found' });
-        }
-        if (action === 'APPROVE') {
-            await prisma_1.default.university.update({
-                where: { id },
-                data: { logoUrl: university.pendingLogoUrl, pendingLogoUrl: null },
-            });
-        }
-        else {
-            await prisma_1.default.university.update({
-                where: { id },
-                data: { pendingLogoUrl: null },
-            });
-        }
-        const latestPendingVerification = await prisma_1.default.universityVerification.findFirst({
-            where: { universityId: id, requestType: 'LOGO', status: 'PENDING' },
-            orderBy: { createdAt: 'desc' },
-        });
-        if (latestPendingVerification) {
-            await prisma_1.default.universityVerification.update({
-                where: { id: latestPendingVerification.id },
-                data: {
-                    status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
-                    reviewedById: req.userId,
-                    reviewedAt: new Date(),
-                },
-            });
         }
         await logAudit(req.userId, `LOGO_REQUEST_${action}`, 'UNIVERSITY', id);
         return res.json({ message: `Logo ${action}D successfully` });
@@ -577,6 +586,54 @@ const reviewLogoRequest = async (req, res) => {
     }
 };
 exports.reviewLogoRequest = reviewLogoRequest;
+const reviewLogoRequestsBulk = async (req, res) => {
+    try {
+        const { action, ids, applyToAll } = req.body;
+        if (!action || !['APPROVE', 'REJECT'].includes(action)) {
+            return res.status(400).json({ message: 'Invalid action' });
+        }
+        let targetIds = [];
+        if (applyToAll) {
+            const pending = await prisma_1.default.university.findMany({
+                where: { pendingLogoUrl: { not: null } },
+                select: { id: true },
+            });
+            targetIds = pending.map((item) => item.id);
+        }
+        else {
+            const incoming = Array.isArray(ids) ? ids : [];
+            targetIds = [...new Set(incoming.map((value) => String(value).trim()).filter(Boolean))];
+        }
+        if (!targetIds.length) {
+            return res.status(400).json({ message: 'No target logo requests found.' });
+        }
+        let resolved = 0;
+        let skipped = 0;
+        for (const universityId of targetIds) {
+            const result = await resolveLogoRequestByUniversityId(universityId, action, req.userId);
+            if (result.resolved)
+                resolved += 1;
+            else
+                skipped += 1;
+        }
+        await logAudit(req.userId, `LOGO_REQUEST_BULK_${action}`, 'UNIVERSITY', undefined, {
+            resolved,
+            skipped,
+            totalInput: targetIds.length,
+            applyToAll: Boolean(applyToAll),
+        });
+        return res.json({
+            message: `Bulk logo ${action.toLowerCase()} completed.`,
+            resolved,
+            skipped,
+            totalInput: targetIds.length,
+        });
+    }
+    catch {
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+exports.reviewLogoRequestsBulk = reviewLogoRequestsBulk;
 // ==================== USER MANAGEMENT ====================
 const deleteUser = async (req, res) => {
     try {
@@ -1013,9 +1070,7 @@ exports.updateSupportTicket = updateSupportTicket;
 // ==================== UNIVERSITY LOGO UPLOAD ====================
 const storage = multer_1.default.diskStorage({
     destination: (_req, _file, cb) => {
-        const uploadDir = path_1.default.join(process.cwd(), 'uploads/logos');
-        if (!fs_1.default.existsSync(uploadDir))
-            fs_1.default.mkdirSync(uploadDir, { recursive: true });
+        const uploadDir = (0, uploads_1.ensureUploadsDir)('logos');
         cb(null, uploadDir);
     },
     filename: (_req, file, cb) => {
@@ -1038,8 +1093,7 @@ const uploadUniversityLogo = async (req, res) => {
         const { id } = req.params;
         if (!req.file)
             return res.status(400).json({ message: 'No image file provided' });
-        const baseUrl = process.env.API_PUBLIC_URL || `http://localhost:${process.env.PORT || 5000}`;
-        const logoUrl = `${baseUrl}/uploads/logos/${req.file.filename}`;
+        const logoUrl = (0, uploads_1.buildUploadUrl)('logos', req.file.filename);
         const university = await prisma_1.default.university.update({
             where: { id },
             data: { logoUrl },

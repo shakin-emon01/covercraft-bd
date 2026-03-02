@@ -36,28 +36,28 @@ export const COLOR_PALETTES = [
 ];
 
 const defaultForm = {
-  university: "University of Dhaka",
-  shortName: "DU",
+  university: "Jahangirnagar University",
+  shortName: "JU",
   logoUrl: "",
-  department: "Computer Science and Engineering",
-  coverType: "LAB REPORT",
+  department: "Dept. of Computer Science & Engineering",
+  coverType: "ASSIGNMENT",
   topicNo: "01",
-  topicName: "Creation of Hospital Database with Primary Key and Foreign Key Constraints",
-  courseCode: "CSE-312",
-  courseTitle: "Database Management System Lab",
-  teacherName: "Albert Einstein",
-  teacherDesignation: "Professor",
+  topicName: "Solving Question",
+  courseCode: "CSE-228",
+  courseTitle: "Theory of Computation",
+  teacherName: "S.M. Faisal",
+  teacherDesignation: "Lecturer",
   teacherDept: "Dept. of Computer Science & Engineering",
   submissionMode: "individual",
-  studentName: "Write Your Name Here...",
-  studentId: "Write Your ID Here...",
+  studentName: "Anisur Rahman",
+  studentId: "24654",
   groupMembers: [
-    { id: 1, name: "Write Your Name Here...", studentId: "Write Your ID Here..." },
-    { id: 2, name: "Member 2 Name", studentId: "ID-02" },
+    { id: 1, name: "Anisur Rahman", studentId: "24654" },
+    { id: 2, name: "Group Member 2", studentId: "24655" },
   ],
-  section: "Your Section Name...",
+  section: "67-H",
   semester: "Spring 2026",
-  submissionDate: "02.03.2026",
+  submissionDate: "28.02.2026",
 };
 
 const cleanFont = "'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif";
@@ -831,10 +831,15 @@ function InputField({ label, field, multiline = false, form, updateForm, ui = de
   );
 }
 
+const DRAFT_STORAGE_KEY = "covercraft_draft_v2";
+const LEGACY_DRAFT_STORAGE_KEY = "covercraft_draft";
+
 const getSavedDraft = () => {
   try {
-    const saved = localStorage.getItem("covercraft_draft");
+    const saved = localStorage.getItem(DRAFT_STORAGE_KEY);
     if (saved) return JSON.parse(saved);
+    const legacySaved = localStorage.getItem(LEGACY_DRAFT_STORAGE_KEY);
+    if (legacySaved) return JSON.parse(legacySaved);
   } catch (e) {
     console.error("Failed to load draft", e);
   }
@@ -845,7 +850,7 @@ export default function CoverDesigner() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { isDark, toggleTheme } = useThemeMode();
-  const { width, isMobile, isTablet } = useViewport();
+  const { width, height, isMobile, isTablet } = useViewport();
   const exportRef = useRef(null);
   const csvInputRef = useRef(null);
   const ui = isDark ? designerUiTheme.dark : designerUiTheme.light;
@@ -872,7 +877,7 @@ export default function CoverDesigner() {
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      localStorage.setItem("covercraft_draft", JSON.stringify({ form, selectedTemplate, selectedPalette }));
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify({ form, selectedTemplate, selectedPalette }));
     }, 1000);
     return () => clearTimeout(timeoutId);
   }, [form, selectedTemplate, selectedPalette]);
@@ -939,10 +944,34 @@ export default function CoverDesigner() {
   const palette = palettes.find((x) => x.id === selectedPalette) || COLOR_PALETTES[0];
   const theme = THEMES[selectedTemplate] || THEMES[1];
   
+  const viewportHeight = Number.isFinite(height) && height > 0
+    ? height
+    : (typeof window !== "undefined" ? window.innerHeight : 720);
+  const isPhone360 = isMobile && width <= 360;
+  const isPhone390 = isMobile && width > 360 && width <= 390;
+  const isPhone412 = isMobile && width > 390 && width <= 412;
+  const mobilePreviewRatio = 0.5;
+  const mobileHeaderPad = isPhone360 ? "8px 10px" : isPhone390 ? "9px 11px" : "10px 12px";
+  const mobileSectionPad = isPhone360 ? "8px 10px" : "9px 12px";
+  const mobileTopHeaderHeight = isPhone360 ? 82 : isPhone390 ? 86 : 92;
+  const mobileAvailableHeight = Math.max(360, viewportHeight - mobileTopHeaderHeight);
+
   const sidebarWidth = isMobile ? "100%" : 326;
-  const previewAvailableWidth = Math.max(320, width - (isMobile ? 24 : isTablet ? 380 : 420));
+  const mobilePreviewHeight = Math.max(200, Math.floor(mobileAvailableHeight * mobilePreviewRatio));
+  const mobilePanelHeight = Math.max(160, mobileAvailableHeight - mobilePreviewHeight);
+  const previewHorizontalPadding = isPhone360 ? 12 : isPhone390 ? 16 : isPhone412 ? 20 : 24;
+  const previewAvailableWidth = Math.max(isPhone360 ? 280 : 300, width - (isMobile ? previewHorizontalPadding : isTablet ? 380 : 420));
   const rawScale = previewAvailableWidth / 794;
-  const previewScale = isMobile ? Math.min(1, rawScale) : isTablet ? Math.min(0.64, rawScale) : Math.min(0.71, rawScale);
+  const mobilePreviewCaptionHeight = isPhone360 ? 24 : 28;
+  const mobilePreviewVerticalPad = isPhone360 ? 16 : 20;
+  const mobileHeightScale = (mobilePreviewHeight - mobilePreviewCaptionHeight - mobilePreviewVerticalPad) / 1123;
+  const previewScale = isMobile
+    ? Math.min(1, rawScale, mobileHeightScale)
+    : isTablet
+      ? Math.min(0.64, rawScale)
+      : Math.min(0.71, rawScale);
+  const scaledPreviewWidth = Math.max(1, Math.round(794 * previewScale));
+  const scaledPreviewHeight = Math.max(1, Math.round(1123 * previewScale));
 
   const updateForm = (key, value) => { setForm((prev) => ({ ...prev, [key]: value })); setStatusMessage(""); };
 
@@ -962,7 +991,8 @@ export default function CoverDesigner() {
 
   const handleClearDraft = () => {
     if(window.confirm("Are you sure you want to clear your current progress and start fresh?")) {
-      localStorage.removeItem("covercraft_draft");
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
+      localStorage.removeItem(LEGACY_DRAFT_STORAGE_KEY);
       setForm(defaultForm);
       setSelectedTemplate(1);
       setSelectedPalette("blue");
@@ -989,7 +1019,7 @@ export default function CoverDesigner() {
            return;
         }
 
-        const headers = (rows || []).map((h) =>
+        const headers = (rows[0] || []).map((h) =>
           String(h || "")
             .replace(/^\uFEFF/, "")
             .toLowerCase()
@@ -1162,50 +1192,88 @@ export default function CoverDesigner() {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: isMobile ? "column-reverse" : "row", minHeight: "100vh", fontFamily: "'Segoe UI', sans-serif", background: ui.appBg, overflowX: "hidden", color: ui.bodyText, transition: "background-color 0.3s ease, color 0.3s ease" }}>
-      <div style={{ width: sidebarWidth, background: ui.sidebarBg, boxShadow: ui.shadow, display: "flex", flexDirection: "column", overflow: "hidden", borderTop: isMobile ? `1px solid ${ui.panelBorder}` : "none", transition: "background-color 0.3s ease" }}>
-        <div style={{ padding: "16px", background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, color: "#fff", position: "relative" }}>
-          <button type="button" onClick={() => navigate("/dashboard")} style={{ border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: 999, padding: "6px 10px", cursor: "pointer", marginBottom: 10 }}>← Back to Home</button>
-          
-          <button type="button" onClick={handleClearDraft} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", color: "rgba(255,255,255,0.7)", fontSize: 18, cursor: "pointer" }} title="Reset Design & Clear Draft">🔄</button>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            style={{ position: "absolute", top: 16, right: 52, border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 13, fontWeight: 700, borderRadius: 999, padding: "4px 9px", cursor: "pointer" }}
-            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {isDark ? "☀" : "☾"}
-          </button>
+    <div style={{ display: "flex", flexDirection: isMobile ? "column-reverse" : "row", minHeight: isMobile ? "100dvh" : "100vh", height: isMobile ? "100dvh" : "auto", fontFamily: "'Segoe UI', sans-serif", background: ui.appBg, overflow: isMobile ? "hidden" : "visible", overflowX: "hidden", color: ui.bodyText, transition: "background-color 0.3s ease, color 0.3s ease" }}>
+      <div style={{ width: sidebarWidth, height: isMobile ? `${mobilePanelHeight}px` : "auto", background: ui.sidebarBg, boxShadow: ui.shadow, display: "flex", flexDirection: "column", overflow: isMobile ? "auto" : "hidden", overflowX: "hidden", borderTop: isMobile ? `1px solid ${ui.panelBorder}` : "none", transition: "background-color 0.3s ease", overscrollBehaviorY: "contain" }}>
+        {!isMobile && (
+          <div style={{ padding: "16px", background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, color: "#fff", position: "relative", flexShrink: 0 }}>
+            <button className="cc-hover-btn" type="button" onClick={() => navigate("/dashboard")} style={{ border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: 999, padding: "6px 10px", cursor: "pointer", marginBottom: 10 }}>← Back to Home</button>
+            
+            <button className="cc-hover-btn" type="button" onClick={handleClearDraft} style={{ position: "absolute", top: 16, right: 16, background: "none", border: "none", color: "rgba(255,255,255,0.7)", fontSize: 18, cursor: "pointer" }} title="Reset Design & Clear Draft">🔄</button>
+            <button
+              className="cc-hover-btn"
+              type="button"
+              onClick={toggleTheme}
+              style={{ position: "absolute", top: 16, right: 52, border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 13, fontWeight: 700, borderRadius: 999, padding: "4px 9px", cursor: "pointer" }}
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {isDark ? "☀" : "☾"}
+            </button>
 
-          <div style={{ fontSize: 17, fontWeight: 800 }}>CoverCraft BD</div>
-          <div style={{ fontSize: 9.5, opacity: 0.76 }}>15 Academic Templates (Auto-saving...)</div>
-        </div>
-        <div style={{ padding: "13px 14px", borderBottom: `1px solid ${ui.sidebarBorder}` }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, color: ui.mutedText, letterSpacing: 1.4, marginBottom: 8 }}>TEMPLATE</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "nowrap", minWidth: 0 }}>
+              <img src="/logo.png" alt="CoverCraft BD logo" style={{ width: 30, height: 30, borderRadius: 8, objectFit: "cover", background: "rgba(255,255,255,0.18)", padding: 2, flexShrink: 0 }} />
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 17, fontWeight: 800, lineHeight: 1.15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>CoverCraft BD</div>
+                <div style={{ fontSize: 9.5, opacity: 0.76, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>15 Academic Templates (Auto-saving...)</div>
+              </div>
+            </div>
+          </div>
+        )}
+        <div className="cc-hover-card" style={{ padding: isMobile ? mobileSectionPad : "13px 14px", borderBottom: `1px solid ${ui.sidebarBorder}`, flexShrink: 0 }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, color: ui.mutedText, letterSpacing: 1.4, marginBottom: isMobile ? 6 : 8 }}>TEMPLATE</div>
           <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(5,1fr)" : "repeat(5,1fr)", gap: 5 }}>
             {templates.map((t) => (
-              <button key={t.id} onClick={() => { setSelectedTemplate(t.id); setStatusMessage(""); }} style={{ padding: "7px 0", borderRadius: 6, border: "none", cursor: "pointer", background: selectedTemplate === t.id ? palette.primary : ui.panelBgSoft, color: selectedTemplate === t.id ? "#fff" : ui.mutedText, fontSize: 11, fontWeight: 700 }}>T{t.id}</button>
+              <button className="cc-hover-btn" key={t.id} onClick={() => { setSelectedTemplate(t.id); setStatusMessage(""); }} style={{ padding: isMobile ? "6px 0" : "7px 0", borderRadius: 6, border: "none", cursor: "pointer", background: selectedTemplate === t.id ? palette.primary : ui.panelBgSoft, color: selectedTemplate === t.id ? "#fff" : ui.mutedText, fontSize: isMobile ? 10.5 : 11, fontWeight: 700 }}>T{t.id}</button>
             ))}
           </div>
-          <div style={{ fontSize: 10, color: ui.mutedText, marginTop: 6 }}>
+          <div style={{ fontSize: 10, color: ui.mutedText, marginTop: isMobile ? 4 : 6 }}>
             <strong style={{ color: palette.primary }}>{templates.find((x) => x.id === selectedTemplate)?.name}</strong>
-            <div>{templates.find((x) => x.id === selectedTemplate)?.desc}</div>
+            {!isMobile && <div>{templates.find((x) => x.id === selectedTemplate)?.desc}</div>}
           </div>
         </div>
-        <div style={{ padding: "12px 14px", borderBottom: `1px solid ${ui.sidebarBorder}` }}>
-          <div style={{ fontSize: 9.5, fontWeight: 700, color: ui.mutedText, letterSpacing: 1.4, marginBottom: 8 }}>COLOR PALETTE</div>
+        <div className="cc-hover-card" style={{ padding: isMobile ? mobileSectionPad : "12px 14px", borderBottom: `1px solid ${ui.sidebarBorder}`, flexShrink: 0 }}>
+          <div style={{ fontSize: 9.5, fontWeight: 700, color: ui.mutedText, letterSpacing: 1.4, marginBottom: isMobile ? 6 : 8 }}>COLOR PALETTE</div>
           <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             {palettes.map((x) => (
-              <button key={x.id} onClick={() => { setSelectedPalette(x.id); setStatusMessage(""); }} style={{ width: 27, height: 27, borderRadius: "50%", border: selectedPalette === x.id ? `2px solid ${isDark ? "#f8fafc" : "#0f172a"}` : "2px solid transparent", background: `linear-gradient(135deg, ${x.primary}, ${x.secondary})`, cursor: "pointer" }} />
+              <button className="cc-hover-btn" key={x.id} onClick={() => { setSelectedPalette(x.id); setStatusMessage(""); }} style={{ width: isMobile ? (isPhone360 ? 22 : 24) : 27, height: isMobile ? (isPhone360 ? 22 : 24) : 27, borderRadius: "50%", border: selectedPalette === x.id ? `2px solid ${isDark ? "#f8fafc" : "#0f172a"}` : "2px solid transparent", background: `linear-gradient(135deg, ${x.primary}, ${x.secondary})`, cursor: "pointer" }} />
             ))}
           </div>
         </div>
-        <div style={{ display: "flex", borderBottom: `1px solid ${ui.sidebarBorder}` }}>
-          {[["university", "University"], ["course", "Course"], ["people", "People"]].map(([id, label]) => (
-            <button key={id} onClick={() => setActiveTab(id)} style={{ flex: 1, padding: "9px 3px", border: "none", cursor: "pointer", background: activeTab === id ? ui.sidebarBg : ui.panelBg, color: activeTab === id ? palette.primary : ui.mutedText, fontSize: 10.8, fontWeight: activeTab === id ? 800 : 600 }}>{label}</button>
-          ))}
+        <div className="cc-hover-card" style={{ padding: isMobile ? "8px 10px" : "10px 12px", borderBottom: `1px solid ${ui.sidebarBorder}`, flexShrink: 0, background: ui.panelBg }}>
+          <div className="cc-tab-strip" style={{ background: isDark ? "rgba(30,41,59,0.82)" : "rgba(148,163,184,0.16)", border: `1px solid ${ui.panelBorder}` }}>
+            {[
+              { id: "university", label: "University", icon: "🏛️" },
+              { id: "course", label: "Course", icon: "📚" },
+              { id: "people", label: "People", icon: "👥" },
+            ].map((item) => {
+              const active = activeTab === item.id;
+              return (
+                <button
+                  className={`cc-hover-btn cc-tab-btn${active ? " is-active" : ""}`}
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  style={{
+                    flex: 1,
+                    padding: isMobile ? (isPhone360 ? "7px 2px" : "8px 4px") : "9px 4px",
+                    border: active ? `1px solid ${palette.primary}` : `1px solid ${ui.panelBorder}`,
+                    cursor: "pointer",
+                    background: active ? `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})` : ui.sidebarBg,
+                    color: active ? "#fff" : ui.mutedText,
+                    fontSize: isMobile ? (isPhone360 ? 10 : 10.5) : 10.8,
+                    fontWeight: active ? 800 : 700,
+                    gap: 5,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <span style={{ fontSize: isMobile ? 10 : 11, lineHeight: 1 }}>{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
-        <div style={{ flex: 1, overflowY: "auto", padding: "13px 14px" }}>
+        <div style={{ flex: isMobile ? "none" : 1, overflowY: isMobile ? "visible" : "auto", padding: isMobile ? (isPhone360 ? "10px 10px 12px" : "10px 12px 14px") : "13px 14px" }}>
           {activeTab === "university" && (<><InputField label="UNIVERSITY NAME" field="university" form={form} updateForm={updateForm} ui={ui} /><InputField label="SHORT NAME" field="shortName" form={form} updateForm={updateForm} ui={ui} /><InputField label="DEPARTMENT" field="department" form={form} updateForm={updateForm} ui={ui} /><InputField label="COVER TYPE" field="coverType" form={form} updateForm={updateForm} ui={ui} /></>)}
           {activeTab === "course" && (<><InputField label="TOPIC NO." field="topicNo" form={form} updateForm={updateForm} ui={ui} /><InputField label="TOPIC NAME" field="topicName" multiline form={form} updateForm={updateForm} ui={ui} /><InputField label="COURSE CODE" field="courseCode" form={form} updateForm={updateForm} ui={ui} /><InputField label="COURSE TITLE" field="courseTitle" form={form} updateForm={updateForm} ui={ui} /><InputField label="SUBMISSION DATE" field="submissionDate" form={form} updateForm={updateForm} ui={ui} /></>)}
           {activeTab === "people" && (
@@ -1217,12 +1285,12 @@ export default function CoverDesigner() {
               <div style={{ margin: "24px 0 16px", borderBottom: `1px solid ${ui.panelBorder}` }} />
 
               <div style={{ display: "flex", background: ui.panelBgSoft, borderRadius: 8, padding: 4, marginBottom: 16 }}>
-                <button onClick={() => updateForm("submissionMode", "individual")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "individual" ? ui.sidebarBg : "transparent", boxShadow: form.submissionMode === "individual" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "individual" ? palette.primary : ui.mutedText, fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👤 Individual</button>
-                <button onClick={() => updateForm("submissionMode", "group")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "group" ? ui.sidebarBg : "transparent", boxShadow: form.submissionMode === "group" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "group" ? palette.primary : ui.mutedText, fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👥 Group</button>
+                <button className="cc-hover-btn" onClick={() => updateForm("submissionMode", "individual")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "individual" ? ui.sidebarBg : "transparent", boxShadow: form.submissionMode === "individual" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "individual" ? palette.primary : ui.mutedText, fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👤 Individual</button>
+                <button className="cc-hover-btn" onClick={() => updateForm("submissionMode", "group")} style={{ flex: 1, padding: "8px", border: "none", borderRadius: 6, background: form.submissionMode === "group" ? ui.sidebarBg : "transparent", boxShadow: form.submissionMode === "group" ? "0 2px 4px rgba(0,0,0,0.05)" : "none", color: form.submissionMode === "group" ? palette.primary : ui.mutedText, fontWeight: 700, fontSize: 11, cursor: "pointer", transition: "all 0.2s" }}>👥 Group</button>
               </div>
 
               {form.submissionMode === "group" ? (
-                <div style={{ marginBottom: 16, background: ui.panelBg, padding: "12px", borderRadius: 8, border: `1px solid ${ui.panelBorder}` }}>
+                <div className="cc-hover-card" style={{ marginBottom: 16, background: ui.panelBg, padding: "12px", borderRadius: 8, border: `1px solid ${ui.panelBorder}` }}>
                   <div style={{ fontSize: 10, fontWeight: 700, color: ui.mutedText, marginBottom: 10, letterSpacing: 1 }}>GROUP MEMBERS (MAX 5)</div>
                   {(form.groupMembers || []).map((m, i) => (
                     <div key={m.id} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
@@ -1233,12 +1301,12 @@ export default function CoverDesigner() {
                         <input type="text" placeholder="ID" value={m.studentId} onChange={(e) => updateGroupMember(m.id, 'studentId', e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: 6, border: `1px solid ${ui.inputBorder}`, fontSize: 11, boxSizing: "border-box", background: ui.inputBg, color: ui.inputText }} />
                       </div>
                       {(form.groupMembers || []).length > 1 && (
-                        <button onClick={() => removeGroupMember(m.id)} style={{ width: 28, height: 32, background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: "bold", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
+                        <button className="cc-hover-btn" onClick={() => removeGroupMember(m.id)} style={{ width: 28, height: 32, background: "#fee2e2", color: "#ef4444", border: "none", borderRadius: 6, cursor: "pointer", fontWeight: "bold", fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>×</button>
                       )}
                     </div>
                   ))}
                   {(form.groupMembers || []).length < 5 && (
-                    <button onClick={addGroupMember} style={{ width: "100%", padding: "8px", background: "#e0e7ff", color: palette.primary, border: `1px dashed ${palette.primary}60`, borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 700, marginTop: 4 }}>+ Add New Member</button>
+                    <button className="cc-hover-btn" onClick={addGroupMember} style={{ width: "100%", padding: "8px", background: "#e0e7ff", color: palette.primary, border: `1px dashed ${palette.primary}60`, borderRadius: 6, cursor: "pointer", fontSize: 11, fontWeight: 700, marginTop: 4 }}>+ Add New Member</button>
                   )}
                 </div>
               ) : (
@@ -1254,21 +1322,21 @@ export default function CoverDesigner() {
           )}
         </div>
         
-        <div style={{ padding: "12px 14px", borderTop: `1px solid ${ui.sidebarBorder}`, display: "flex", flexDirection: "column", gap: 8 }}>
-          <button onClick={handleShareLink} disabled={isSaving} style={{ width: "100%", padding: 10, borderRadius: 7, border: `2px dashed ${palette.primary}`, background: ui.panelBg, color: palette.primary, fontWeight: 800, cursor: isSaving ? "not-allowed" : "pointer" }}>
+        <div className="cc-hover-card" style={{ padding: isMobile ? (isPhone360 ? "10px 10px 12px" : "10px 12px 14px") : "12px 14px", borderTop: `1px solid ${ui.sidebarBorder}`, display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+          <button className="cc-hover-btn" onClick={handleShareLink} disabled={isSaving} style={{ width: "100%", padding: 10, borderRadius: 7, border: `2px dashed ${palette.primary}`, background: ui.panelBg, color: palette.primary, fontWeight: 800, cursor: isSaving ? "not-allowed" : "pointer" }}>
             {isSaving ? "Wait..." : "🔗 Copy Share Link"}
           </button>
           
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={handleDownloadPdf} disabled={isSaving} style={{ flex: 1, padding: 10, borderRadius: 7, border: "none", background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, color: "#fff", fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>Download PDF</button>
-            <button onClick={handleDownloadPng} disabled={isSaving} style={{ flex: 1, padding: 10, borderRadius: 7, border: `2px solid ${palette.primary}`, background: ui.sidebarBg, color: palette.primary, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>Save PNG</button>
+          <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 8 }}>
+            <button className="cc-hover-btn" onClick={handleDownloadPdf} disabled={isSaving} style={{ flex: 1, padding: 10, borderRadius: 7, border: "none", background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, color: "#fff", fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>Download PDF</button>
+            <button className="cc-hover-btn" onClick={handleDownloadPng} disabled={isSaving} style={{ flex: 1, padding: 10, borderRadius: 7, border: `2px solid ${palette.primary}`, background: ui.sidebarBg, color: palette.primary, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>Save PNG</button>
           </div>
 
-          <div style={{ marginTop: 6, padding: 12, background: ui.panelBg, borderRadius: 8, border: `1px dashed ${ui.inputBorder}` }}>
+          <div className="cc-hover-card" style={{ marginTop: 6, padding: 12, background: ui.panelBg, borderRadius: 8, border: `1px dashed ${ui.inputBorder}` }}>
             <div style={{ fontSize: 10, fontWeight: 800, color: ui.mutedText, marginBottom: 8, letterSpacing: 1.5 }}>CR SPECIAL (BATCH MODE)</div>
             
             {batchStudents.length === 0 ? (
-              <button onClick={() => {
+              <button className="cc-hover-btn" onClick={() => {
                 if (csvInputRef.current) csvInputRef.current.value = ""; 
                 csvInputRef.current?.click();
               }} disabled={isSaving} style={{ width: "100%", padding: 10, borderRadius: 6, border: `1px solid ${ui.inputBorder}`, background: ui.sidebarBg, color: ui.bodyText, fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>
@@ -1276,16 +1344,16 @@ export default function CoverDesigner() {
               </button>
             ) : (
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setBatchStudents([])} disabled={isSaving} style={{ width: "30%", padding: 10, borderRadius: 6, border: "1px solid #ef4444", background: ui.sidebarBg, color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>
+                <button className="cc-hover-btn" onClick={() => setBatchStudents([])} disabled={isSaving} style={{ width: "30%", padding: 10, borderRadius: 6, border: "1px solid #ef4444", background: ui.sidebarBg, color: "#ef4444", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer" }}>
                   Cancel
                 </button>
-                <button onClick={handleBatchDownload} disabled={isSaving} style={{ width: "70%", padding: 10, borderRadius: 6, border: "none", background: "#0f172a", color: "#fff", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer", boxShadow: "0 4px 6px rgba(15, 23, 42, 0.2)" }}>
+                <button className="cc-hover-btn" onClick={handleBatchDownload} disabled={isSaving} style={{ width: "70%", padding: 10, borderRadius: 6, border: "none", background: "#0f172a", color: "#fff", fontSize: 12, fontWeight: 700, cursor: isSaving ? "not-allowed" : "pointer", boxShadow: "0 4px 6px rgba(15, 23, 42, 0.2)" }}>
                   📦 2. Get ZIP ({batchStudents.length})
                 </button>
               </div>
             )}
 
-            <button onClick={downloadSampleCsv} style={{ background: "none", border: "none", color: palette.primary, fontSize: 11, cursor: "pointer", marginTop: 8, width: "100%", textDecoration: "underline" }}>Download Sample CSV</button>
+            <button className="cc-hover-btn" onClick={downloadSampleCsv} style={{ background: "none", border: "none", color: palette.primary, fontSize: 11, cursor: "pointer", marginTop: 8, width: "100%", textDecoration: "underline" }}>Download Sample CSV</button>
             <input type="file" accept=".csv" ref={csvInputRef} style={{ display: "none" }} onChange={handleCsvSelect} />
           </div>
         </div>
@@ -1293,12 +1361,48 @@ export default function CoverDesigner() {
         {statusMessage && <div style={{ padding: "8px 14px 12px", fontSize: 11, color: statusMessage.includes("❌") ? "#ef4444" : ui.bodyText, fontWeight: "bold", borderTop: `1px solid ${ui.sidebarBorder}`, textAlign: "center", background: ui.statusBg }}>{statusMessage}</div>}
       </div>
 
-      <div style={{ flex: 1, minWidth: 0, overflow: "auto", padding: isMobile ? "14px 8px 12px" : "22px 28px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <div style={{ marginBottom: 14, fontSize: 10.5, color: ui.previewCaption, letterSpacing: 2, fontWeight: 700 }}>LIVE PREVIEW - A4 FORMAT</div>
-        <div style={{ transform: `scale(${previewScale})`, transformOrigin: "top center", boxShadow: "0 24px 70px rgba(0,0,0,0.16)", marginBottom: isMobile ? 14 : -320, transition: "transform 0.15s ease" }}>
-          <CoverPage form={form} palette={palette} theme={theme} />
-        </div>
+      <div style={{ flex: 1, minWidth: 0, height: isMobile ? `${mobilePreviewHeight}px` : "auto", overflow: isMobile ? "hidden" : "auto", padding: isMobile ? (isPhone360 ? "8px 6px" : "10px 8px") : "22px 28px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: isMobile ? "flex-start" : "flex-start" }}>
+        <div style={{ marginBottom: isPhone360 ? 10 : 14, fontSize: isPhone360 ? 9.5 : 10.5, color: ui.previewCaption, letterSpacing: isPhone360 ? 1.6 : 2, fontWeight: 700 }}>LIVE PREVIEW - A4 FORMAT</div>
+        {isMobile ? (
+          <div className="cc-hover-card" style={{ width: `${scaledPreviewWidth}px`, height: `${scaledPreviewHeight}px`, boxShadow: "0 24px 70px rgba(0,0,0,0.16)", overflow: "hidden", flexShrink: 0 }}>
+            <div style={{ width: 794, height: 1123, transform: `scale(${previewScale})`, transformOrigin: "top left", transition: "transform 0.15s ease" }}>
+              <CoverPage form={form} palette={palette} theme={theme} />
+            </div>
+          </div>
+        ) : (
+          <div className="cc-hover-card" style={{ transform: `scale(${previewScale})`, transformOrigin: "top center", boxShadow: "0 24px 70px rgba(0,0,0,0.16)", marginBottom: -320, transition: "transform 0.15s ease" }}>
+            <CoverPage form={form} palette={palette} theme={theme} />
+          </div>
+        )}
       </div>
+
+      {isMobile && (
+        <div style={{ height: `${mobileTopHeaderHeight}px`, padding: mobileHeaderPad, background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary})`, color: "#fff", borderBottom: `1px solid ${palette.accent}66`, display: "flex", flexDirection: "column", justifyContent: "center", gap: isPhone360 ? 5 : 6, flexShrink: 0 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <button className="cc-hover-btn" type="button" onClick={() => navigate("/dashboard")} style={{ border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: isPhone360 ? 9.6 : 10, fontWeight: 700, borderRadius: 999, padding: isPhone360 ? "4px 7px" : "4px 8px", cursor: "pointer", whiteSpace: "nowrap" }}>← Back to Home</button>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <button
+                className="cc-hover-btn"
+                type="button"
+                onClick={toggleTheme}
+                style={{ border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "#fff", fontSize: 11, fontWeight: 700, borderRadius: 999, padding: "3px 7px", cursor: "pointer" }}
+                title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              >
+                {isDark ? "☀" : "☾"}
+              </button>
+              <button className="cc-hover-btn" type="button" onClick={handleClearDraft} style={{ border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.14)", color: "rgba(255,255,255,0.92)", fontSize: 12, fontWeight: 700, borderRadius: 8, padding: "3px 6px", cursor: "pointer" }} title="Reset Design & Clear Draft">🔄</button>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: isPhone360 ? 6 : 7, flexWrap: "nowrap", minWidth: 0 }}>
+            <img src="/logo.png" alt="CoverCraft BD logo" style={{ width: isPhone360 ? 22 : 24, height: isPhone360 ? 22 : 24, borderRadius: 8, objectFit: "cover", background: "rgba(255,255,255,0.18)", padding: 2, flexShrink: 0 }} />
+            <div style={{ minWidth: 0 }}>
+              <div style={{ fontSize: isPhone360 ? 14 : 15, fontWeight: 800, lineHeight: 1.12, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>CoverCraft BD</div>
+              <div style={{ fontSize: isPhone360 ? 8.2 : 8.8, opacity: 0.78, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>15 Academic Templates (Auto-saving...)</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div style={{ position: "fixed", top: -9999, left: -9999, width: 794, height: 1123, overflow: "hidden" }}>
         <div ref={exportRef} xmlns="http://www.w3.org/1999/xhtml">
@@ -1308,3 +1412,4 @@ export default function CoverDesigner() {
     </div>
   );
 }
+

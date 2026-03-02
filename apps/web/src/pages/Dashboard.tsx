@@ -161,14 +161,13 @@ export default function Dashboard() {
 
   const handleDuplicate = (cover: any) => {
     const coverForm = cover?.coverData || {};
-    localStorage.setItem(
-      'covercraft_draft',
-      JSON.stringify({
-        form: coverForm,
-        selectedTemplate: Number(cover?.templateId) || 1,
-        selectedPalette: cover?.paletteId || 'blue',
-      })
-    );
+    const payload = JSON.stringify({
+      form: coverForm,
+      selectedTemplate: Number(cover?.templateId) || 1,
+      selectedPalette: cover?.paletteId || 'blue',
+    });
+    localStorage.setItem('covercraft_draft_v2', payload);
+    localStorage.setItem('covercraft_draft', payload);
     navigate('/create');
   };
 
@@ -238,16 +237,16 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
-        <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="CoverCraft BD logo" className="h-11 w-11 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-slate-700" />
-            <div>
-              <div className="text-lg font-black leading-tight tracking-tight">CoverCraft BD</div>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Academic Cover Generator</p>
+        <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-3 flex-nowrap">
+            <img src="/logo.png" alt="CoverCraft BD logo" className="h-11 w-11 shrink-0 rounded-xl object-cover ring-1 ring-slate-200 dark:ring-slate-700" />
+            <div className="min-w-0">
+              <div className="truncate whitespace-nowrap text-lg font-black leading-tight tracking-tight">CoverCraft BD</div>
+              <p className="truncate whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">Academic Cover Generator</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:gap-3">
             <button
               type="button"
               onClick={toggleTheme}
