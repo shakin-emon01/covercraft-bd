@@ -1,5 +1,5 @@
 import express, { type Express } from 'express';
-import cors from 'cors';
+import cors, { type CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
@@ -23,6 +23,20 @@ dotenv.config();
 const app: Express = express();
 const PORT = process.env.PORT || 5000;
 
+const normalizeOrigin = (value: string) => value.trim().replace(/\/+$/, '');
+const parseOriginList = (...values: Array<string | undefined>) =>
+  values
+    .flatMap((entry) => String(entry ?? '').split(','))
+    .map((item) => normalizeOrigin(item))
+    .filter(Boolean);
+const getOriginHostname = (origin: string) => {
+  try {
+    return new URL(origin).hostname.toLowerCase();
+  } catch {
+    return '';
+  }
+};
+
 const trustProxyRaw = String(process.env.TRUST_PROXY ?? '1').trim().toLowerCase();
 const resolvedTrustProxy: boolean | number =
   trustProxyRaw === 'true'
@@ -43,7 +57,42 @@ app.use(
 );
 
 // 2. CORS & Body Parser
-app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
+const allowVercelOrigins = String(process.env.ALLOW_VERCEL_ORIGINS ?? 'true').trim().toLowerCase() !== 'false';
+const allowedOrigins = new Set(
+  parseOriginList(
+    process.env.CLIENT_URL,
+    process.env.CLIENT_ORIGINS,
+    'http://localhost:5173',
+    'http://localhost:4173',
+    'https://covercraftbd.vercel.app'
+  )
+);
+const allowAllOrigins = String(process.env.CORS_ALLOW_ALL ?? '').trim().toLowerCase() === 'true' || allowedOrigins.size === 0;
+
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+
+    const normalizedOrigin = normalizeOrigin(origin);
+    if (allowAllOrigins || allowedOrigins.has(normalizedOrigin)) {
+      return callback(null, true);
+    }
+
+    const hostname = getOriginHostname(normalizedOrigin);
+    if (allowVercelOrigins && hostname.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+
+    return callback(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 

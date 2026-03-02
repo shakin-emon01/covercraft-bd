@@ -57,6 +57,19 @@ const uploads_1 = require("./lib/uploads");
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const PORT = process.env.PORT || 5000;
+const normalizeOrigin = (value) => value.trim().replace(/\/+$/, '');
+const parseOriginList = (...values) => values
+    .flatMap((entry) => String(entry ?? '').split(','))
+    .map((item) => normalizeOrigin(item))
+    .filter(Boolean);
+const getOriginHostname = (origin) => {
+    try {
+        return new URL(origin).hostname.toLowerCase();
+    }
+    catch {
+        return '';
+    }
+};
 const trustProxyRaw = String(process.env.TRUST_PROXY ?? '1').trim().toLowerCase();
 const resolvedTrustProxy = trustProxyRaw === 'true'
     ? true
@@ -72,7 +85,30 @@ app.use((0, helmet_1.default)({
     crossOriginResourcePolicy: { policy: "cross-origin" },
 }));
 // 2. CORS & Body Parser
-app.use((0, cors_1.default)({ origin: process.env.CLIENT_URL || '*', credentials: true }));
+const allowVercelOrigins = String(process.env.ALLOW_VERCEL_ORIGINS ?? 'true').trim().toLowerCase() !== 'false';
+const allowedOrigins = new Set(parseOriginList(process.env.CLIENT_URL, process.env.CLIENT_ORIGINS, 'http://localhost:5173', 'http://localhost:4173', 'https://covercraftbd.vercel.app'));
+const allowAllOrigins = String(process.env.CORS_ALLOW_ALL ?? '').trim().toLowerCase() === 'true' || allowedOrigins.size === 0;
+const corsOptions = {
+    origin: (origin, callback) => {
+        if (!origin)
+            return callback(null, true);
+        const normalizedOrigin = normalizeOrigin(origin);
+        if (allowAllOrigins || allowedOrigins.has(normalizedOrigin)) {
+            return callback(null, true);
+        }
+        const hostname = getOriginHostname(normalizedOrigin);
+        if (allowVercelOrigins && hostname.endsWith('.vercel.app')) {
+            return callback(null, true);
+        }
+        return callback(null, false);
+    },
+    credentials: true,
+    methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 204,
+};
+app.use((0, cors_1.default)(corsOptions));
+app.options('*', (0, cors_1.default)(corsOptions));
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ limit: '10mb', extended: true }));
 // 3. Security Middleware
