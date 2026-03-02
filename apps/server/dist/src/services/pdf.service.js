@@ -24,7 +24,7 @@ const generatePdfBuffer = async (url, headers) => {
     const pdfBuffer = await page.pdf({
         format: 'A4',
         printBackground: true,
-        margin: { top: '0px', right: '0px', bottom: '0px', left: '0px' },
+        margin: { top: '20px', right: '0px', bottom: '20px', left: '0px' },
     });
     await browser.close();
     return Buffer.from(pdfBuffer);

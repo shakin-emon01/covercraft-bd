@@ -35,6 +35,12 @@ export default function PrintView() {
   const paletteId = form.paletteId || "blue";
   const palette = COLOR_PALETTES.find((x) => x.id === paletteId) || COLOR_PALETTES[0];
   const theme = THEMES[cover.templateId] || THEMES[1];
+  const A4_WIDTH_PX = 794;
+  const A4_HEIGHT_PX = 1123;
+  const PAGE_MARGIN_Y_PX = 20;
+  const printableHeight = A4_HEIGHT_PX - PAGE_MARGIN_Y_PX * 2;
+  const printScale = printableHeight / A4_HEIGHT_PX;
+  const scaledWidth = Math.round(A4_WIDTH_PX * printScale);
 
   return (
     <>
@@ -44,7 +50,7 @@ export default function PrintView() {
           margin: 20px 0;
         }
 
-        html, body {
+        html, body, #root {
           margin: 0;
           padding: 0;
           background: #ffffff;
@@ -54,9 +60,37 @@ export default function PrintView() {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
+
+        #print-cover-root {
+          background: #ffffff;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          padding: 16px 0;
+          box-sizing: border-box;
+        }
+
+        @media print {
+          html, body, #root {
+            width: 210mm;
+            height: 297mm;
+            overflow: hidden;
+          }
+
+          #print-cover-root {
+            min-height: auto;
+            height: calc(297mm - 40px);
+            padding: 0;
+          }
+        }
       `}</style>
-      <div style={{ background: "#ffffff", minHeight: "100vh", display: "flex", justifyContent: "center", paddingTop: 16, paddingBottom: 16, boxSizing: "border-box" }}>
-        <CoverPage form={form} palette={palette} theme={theme} />
+      <div id="print-cover-root">
+        <div style={{ width: scaledWidth, height: printableHeight, overflow: "hidden" }}>
+          <div style={{ width: A4_WIDTH_PX, height: A4_HEIGHT_PX, transform: `scale(${printScale})`, transformOrigin: "top left" }}>
+            <CoverPage form={form} palette={palette} theme={theme} />
+          </div>
+        </div>
       </div>
     </>
   );
